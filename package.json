@@ -21,5 +21,14 @@
     "strip-sourcemap-loader": "0.0.1"
   },
   "name": "tmp",
-  "description": "tmp: An Ionic project"
+  "description": "tmp: An Ionic project",
+  "cordovaPlugins": [
+    "cordova-plugin-device",
+    "cordova-plugin-console",
+    "cordova-plugin-whitelist",
+    "cordova-plugin-splashscreen",
+    "cordova-plugin-statusbar",
+    "ionic-plugin-keyboard"
+  ],
+  "cordovaPlatforms": []
 }

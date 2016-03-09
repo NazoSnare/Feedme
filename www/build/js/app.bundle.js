@@ -3180,27 +3180,29 @@
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 	var _dec, _class;
+	//import {Storage, LocalStorage} from 'ionic-framework';
+
 
 	var _ionic = __webpack_require__(5);
 
 	var _welcome = __webpack_require__(358);
 
-	var _propertyList = __webpack_require__(359);
+	var _mealList = __webpack_require__(359);
 
-	var _brokerList = __webpack_require__(592);
+	var _cookList = __webpack_require__(592);
 
 	var _favoriteList = __webpack_require__(593);
 
-	var _propertyService = __webpack_require__(591);
+	var _mealService = __webpack_require__(591);
 
-	var _brokerService = __webpack_require__(362);
+	var _cookService = __webpack_require__(362);
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var MyApp = (_dec = (0, _ionic.App)({
 	    templateUrl: 'build/app.html',
 	    config: {},
-	    providers: [_propertyService.PropertyService, _brokerService.BrokerService]
+	    providers: [_mealService.MealService, _cookService.CookService]
 	}), _dec(_class = function () {
 	    _createClass(MyApp, null, [{
 	        key: 'parameters',
@@ -3218,9 +3220,18 @@
 	        this.initializeApp();
 
 	        // set our app's pages
-	        this.pages = [{ title: 'Welcome', component: _welcome.WelcomePage, icon: "bookmark" }, { title: 'Meals', component: _propertyList.PropertyListPage, icon: "home" }, { title: 'Cooks', component: _brokerList.BrokerListPage, icon: "people" }, { title: 'Favorites', component: _favoriteList.FavoriteListPage, icon: "star" }];
+	        this.pages = [{ title: 'Welcome', component: _welcome.WelcomePage, icon: "bookmark" }, { title: 'Meals', component: _mealList.MealListPage, icon: "home" }, { title: 'Cooks', component: _cookList.CookListPage, icon: "people" }, { title: 'Favorites', component: _favoriteList.FavoriteListPage, icon: "star" }];
 
-	        // make PropertyListPage the root (or first) page
+	        /*
+	        this.local = new Storage(LocalStorage);
+	        if (!this.local.get('firstLaunch')) {
+	            this.rootPage = WelcomePage;
+	        } else {
+	            this.local.set('firstLaunch', false);
+	            this.rootPage = MealListPage;
+	        }
+	        */
+
 	        this.rootPage = _welcome.WelcomePage;
 	    }
 
@@ -62193,7 +62204,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.PropertyListPage = undefined;
+	exports.MealListPage = undefined;
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -62203,44 +62214,44 @@
 
 	var _ionic = __webpack_require__(5);
 
-	var _propertyDetails = __webpack_require__(360);
+	var _mealDetails = __webpack_require__(360);
 
-	var _propertyService = __webpack_require__(591);
+	var _mealService = __webpack_require__(591);
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var PropertyListPage = exports.PropertyListPage = (_dec = (0, _ionic.Page)({
-	    templateUrl: 'build/pages/property-list/property-list.html'
+	var MealListPage = exports.MealListPage = (_dec = (0, _ionic.Page)({
+	    templateUrl: 'build/pages/meal-list/meal-list.html'
 	}), _dec(_class = function () {
-	    _createClass(PropertyListPage, null, [{
+	    _createClass(MealListPage, null, [{
 	        key: 'parameters',
 	        get: function get() {
-	            return [[_ionic.NavController], [_ionic.NavParams], [_propertyService.PropertyService]];
+	            return [[_ionic.NavController], [_ionic.NavParams], [_mealService.MealService]];
 	        }
 	    }]);
 
-	    function PropertyListPage(nav, navParams, propertyService) {
-	        _classCallCheck(this, PropertyListPage);
+	    function MealListPage(nav, navParams, mealService) {
+	        _classCallCheck(this, MealListPage);
 
 	        this.nav = nav;
-	        this.propertyService = propertyService;
+	        this.mealService = mealService;
 	        this.selectedItem = navParams.get('item');
 	    }
 
-	    _createClass(PropertyListPage, [{
+	    _createClass(MealListPage, [{
 	        key: 'ngOnInit',
 	        value: function ngOnInit() {
 	            var _this = this;
 
-	            this.propertyService.findAll().subscribe(function (data) {
-	                return _this.properties = data;
+	            this.mealService.findAll().subscribe(function (data) {
+	                return _this.meals = data;
 	            });
 	        }
 	    }, {
 	        key: 'itemTapped',
-	        value: function itemTapped(event, property) {
-	            this.nav.push(_propertyDetails.PropertyDetailsPage, {
-	                property: property
+	        value: function itemTapped(event, meal) {
+	            this.nav.push(_mealDetails.MealDetailsPage, {
+	                meal: meal
 	            });
 	        }
 	    }, {
@@ -62252,7 +62263,7 @@
 	        }
 	    }]);
 
-	    return PropertyListPage;
+	    return MealListPage;
 	}()) || _class);
 
 /***/ },
@@ -62264,7 +62275,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.PropertyDetailsPage = undefined;
+	exports.MealDetailsPage = undefined;
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -62272,39 +62283,39 @@
 
 	var _ionic = __webpack_require__(5);
 
-	var _brokerDetails = __webpack_require__(361);
+	var _cookDetails = __webpack_require__(361);
 
-	var _propertyService = __webpack_require__(591);
+	var _mealService = __webpack_require__(591);
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var PropertyDetailsPage = exports.PropertyDetailsPage = (_dec = (0, _ionic.Page)({
-	    templateUrl: 'build/pages/property-details/property-details.html'
+	var MealDetailsPage = exports.MealDetailsPage = (_dec = (0, _ionic.Page)({
+	    templateUrl: 'build/pages/meal-details/meal-details.html'
 	}), _dec(_class = function () {
-	    _createClass(PropertyDetailsPage, null, [{
+	    _createClass(MealDetailsPage, null, [{
 	        key: 'parameters',
 	        get: function get() {
-	            return [[_ionic.NavController], [_ionic.NavParams], [_propertyService.PropertyService]];
+	            return [[_ionic.NavController], [_ionic.NavParams], [_mealService.MealService]];
 	        }
 	    }]);
 
-	    function PropertyDetailsPage(nav, navParams, propertyService) {
-	        _classCallCheck(this, PropertyDetailsPage);
+	    function MealDetailsPage(nav, navParams, mealService) {
+	        _classCallCheck(this, MealDetailsPage);
 
 	        this.nav = nav;
-	        this.propertyService = propertyService;
-	        this.property = navParams.get('property');
+	        this.mealService = mealService;
+	        this.meal = navParams.get('meal');
 	    }
 
-	    _createClass(PropertyDetailsPage, [{
+	    _createClass(MealDetailsPage, [{
 	        key: 'favorite',
-	        value: function favorite(event, property) {
+	        value: function favorite(event, meal) {
 	            var _this = this;
 
-	            this.propertyService.favorite(property).subscribe(function (property) {
+	            this.mealService.favorite(meal).subscribe(function (meal) {
 	                var alert = _ionic.Alert.create({
 	                    title: 'Favorites',
-	                    subTitle: 'Property added to your favorites',
+	                    subTitle: 'Meal added to your favorites',
 	                    buttons: ['OK']
 	                });
 	                _this.nav.present(alert);
@@ -62312,15 +62323,15 @@
 	        }
 	    }, {
 	        key: 'like',
-	        value: function like(event, property) {
+	        value: function like(event, meal) {
 
-	            this.propertyService.like(property).subscribe(function (likes) {
-	                property.likes = likes;
+	            this.mealService.like(meal).subscribe(function (likes) {
+	                meal.likes = likes;
 	            });
 	        }
 	    }, {
 	        key: 'share',
-	        value: function share(event, property) {
+	        value: function share(event, meal) {
 	            var actionSheet = _ionic.ActionSheet.create({
 	                buttons: [{
 	                    text: 'Text',
@@ -62353,10 +62364,10 @@
 	            this.nav.present(actionSheet);
 	        }
 	    }, {
-	        key: 'showBroker',
-	        value: function showBroker(event, broker) {
-	            this.nav.push(_brokerDetails.BrokerDetailsPage, {
-	                broker: broker
+	        key: 'showCook',
+	        value: function showCook(event, cook) {
+	            this.nav.push(_cookDetails.CookDetailsPage, {
+	                cook: cook
 	            });
 	        }
 	    }, {
@@ -62367,7 +62378,7 @@
 	        value: function showMap(event) {}
 	    }]);
 
-	    return PropertyDetailsPage;
+	    return MealDetailsPage;
 	}()) || _class);
 
 /***/ },
@@ -62379,7 +62390,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.BrokerDetailsPage = undefined;
+	exports.CookDetailsPage = undefined;
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -62389,39 +62400,39 @@
 
 	var _ionic = __webpack_require__(5);
 
-	var _brokerService = __webpack_require__(362);
+	var _cookService = __webpack_require__(362);
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var BrokerDetailsPage = exports.BrokerDetailsPage = (_dec = (0, _ionic.Page)({
-	    templateUrl: 'build/pages/broker-details/broker-details.html'
+	var CookDetailsPage = exports.CookDetailsPage = (_dec = (0, _ionic.Page)({
+	    templateUrl: 'build/pages/cook-details/cook-details.html'
 	}), _dec(_class = function () {
-	    _createClass(BrokerDetailsPage, null, [{
+	    _createClass(CookDetailsPage, null, [{
 	        key: 'parameters',
 	        get: function get() {
-	            return [[_ionic.NavController], [_ionic.NavParams], [_brokerService.BrokerService]];
+	            return [[_ionic.NavController], [_ionic.NavParams], [_cookService.CookService]];
 	        }
 	    }]);
 
-	    function BrokerDetailsPage(nav, navParams, brokerService) {
-	        _classCallCheck(this, BrokerDetailsPage);
+	    function CookDetailsPage(nav, navParams, cookService) {
+	        _classCallCheck(this, CookDetailsPage);
 
-	        this.brokerService = brokerService;
-	        this.broker = navParams.get('broker');
+	        this.cookService = cookService;
+	        this.cook = navParams.get('cook');
 	    }
 
-	    _createClass(BrokerDetailsPage, [{
+	    _createClass(CookDetailsPage, [{
 	        key: 'ngOnInit',
 	        value: function ngOnInit() {
 	            var _this = this;
 
-	            this.brokerService.findById(this.broker.id).subscribe(function (broker) {
-	                return _this.broker = broker;
+	            this.cookService.findById(this.cook.id).subscribe(function (cook) {
+	                return _this.cook = cook;
 	            });
 	        }
 	    }]);
 
-	    return BrokerDetailsPage;
+	    return CookDetailsPage;
 	}()) || _class);
 
 /***/ },
@@ -62433,7 +62444,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.BrokerService = undefined;
+	exports.CookService = undefined;
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -62451,33 +62462,33 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var brokersURL = _config.SERVER_URL + 'brokers/';
+	var cooksURL = _config.SERVER_URL + 'cooks/';
 
-	var BrokerService = exports.BrokerService = (_dec = (0, _core.Injectable)(), _dec(_class = function () {
-	    _createClass(BrokerService, null, [{
+	var CookService = exports.CookService = (_dec = (0, _core.Injectable)(), _dec(_class = function () {
+	    _createClass(CookService, null, [{
 	        key: 'parameters',
 	        get: function get() {
 	            return [[_http.Http]];
 	        }
 	    }]);
 
-	    function BrokerService(http) {
-	        _classCallCheck(this, BrokerService);
+	    function CookService(http) {
+	        _classCallCheck(this, CookService);
 
 	        this.http = http;
 	    }
 
-	    _createClass(BrokerService, [{
+	    _createClass(CookService, [{
 	        key: 'findAll',
 	        value: function findAll() {
-	            return this.http.get(brokersURL).map(function (res) {
+	            return this.http.get(cooksURL).map(function (res) {
 	                return res.json();
 	            }).catch(this.handleError);
 	        }
 	    }, {
 	        key: 'findById',
 	        value: function findById(id) {
-	            return this.http.get(brokersURL + id).map(function (res) {
+	            return this.http.get(cooksURL + id).map(function (res) {
 	                return res.json();
 	            }).catch(this.handleError);
 	        }
@@ -62488,7 +62499,7 @@
 	        }
 	    }]);
 
-	    return BrokerService;
+	    return CookService;
 	}()) || _class);
 
 /***/ },
@@ -71259,7 +71270,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.PropertyService = undefined;
+	exports.MealService = undefined;
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -71278,28 +71289,28 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var favorites = [],
-	    propertiesURL = _config.SERVER_URL + 'properties/',
-	    favoritesURL = propertiesURL + 'favorites/',
-	    likesURL = propertiesURL + 'likes/';
+	    mealsURL = _config.SERVER_URL + 'meals/',
+	    favoritesURL = mealsURL + 'favorites/',
+	    likesURL = mealsURL + 'likes/';
 
-	var PropertyService = exports.PropertyService = (_dec = (0, _core.Injectable)(), _dec(_class = function () {
-	    _createClass(PropertyService, null, [{
+	var MealService = exports.MealService = (_dec = (0, _core.Injectable)(), _dec(_class = function () {
+	    _createClass(MealService, null, [{
 	        key: 'parameters',
 	        get: function get() {
 	            return [[_http.Http]];
 	        }
 	    }]);
 
-	    function PropertyService(http) {
-	        _classCallCheck(this, PropertyService);
+	    function MealService(http) {
+	        _classCallCheck(this, MealService);
 
 	        this.http = http;
 	    }
 
-	    _createClass(PropertyService, [{
+	    _createClass(MealService, [{
 	        key: 'findAll',
 	        value: function findAll() {
-	            return this.http.get(propertiesURL).map(function (res) {
+	            return this.http.get(mealsURL).map(function (res) {
 	                return res.json();
 	            }).catch(this.handleError);
 	        }
@@ -71312,8 +71323,8 @@
 	        }
 	    }, {
 	        key: 'like',
-	        value: function like(property) {
-	            var body = JSON.stringify(property);
+	        value: function like(meal) {
+	            var body = JSON.stringify(meal);
 	            var headers = new _http.Headers({ 'Content-Type': 'application/json' });
 	            var options = new _http.RequestOptions({ headers: headers });
 	            return this.http.post(likesURL, body, options).map(function (res) {
@@ -71322,16 +71333,16 @@
 	        }
 	    }, {
 	        key: 'favorite',
-	        value: function favorite(property) {
-	            var body = JSON.stringify(property);
+	        value: function favorite(meal) {
+	            var body = JSON.stringify(meal);
 	            var headers = new _http.Headers({ 'Content-Type': 'application/json' });
 	            var options = new _http.RequestOptions({ headers: headers });
 	            return this.http.post(favoritesURL, body, options).catch(this.handleError);
 	        }
 	    }, {
 	        key: 'unfavorite',
-	        value: function unfavorite(property) {
-	            return this.http.delete(favoritesURL + property.id).map(function (res) {
+	        value: function unfavorite(meal) {
+	            return this.http.delete(favoritesURL + meal.id).map(function (res) {
 	                return res.json();
 	            }).catch(this.handleError);
 	        }
@@ -71343,7 +71354,7 @@
 	        }
 	    }]);
 
-	    return PropertyService;
+	    return MealService;
 	}()) || _class);
 
 /***/ },
@@ -71355,7 +71366,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.BrokerListPage = undefined;
+	exports.CookListPage = undefined;
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -71365,50 +71376,50 @@
 
 	var _ionic = __webpack_require__(5);
 
-	var _brokerDetails = __webpack_require__(361);
+	var _cookDetails = __webpack_require__(361);
 
-	var _brokerService = __webpack_require__(362);
+	var _cookService = __webpack_require__(362);
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var BrokerListPage = exports.BrokerListPage = (_dec = (0, _ionic.Page)({
-	    templateUrl: 'build/pages/broker-list/broker-list.html'
+	var CookListPage = exports.CookListPage = (_dec = (0, _ionic.Page)({
+	    templateUrl: 'build/pages/cook-list/cook-list.html'
 	}), _dec(_class = function () {
-	    _createClass(BrokerListPage, null, [{
+	    _createClass(CookListPage, null, [{
 	        key: 'parameters',
 	        get: function get() {
-	            return [[_ionic.NavController], [_ionic.NavParams], [_brokerService.BrokerService]];
+	            return [[_ionic.NavController], [_ionic.NavParams], [_cookService.CookService]];
 	        }
 	    }]);
 
-	    function BrokerListPage(nav, navParams, brokerService) {
-	        _classCallCheck(this, BrokerListPage);
+	    function CookListPage(nav, navParams, cookService) {
+	        _classCallCheck(this, CookListPage);
 
 	        this.nav = nav;
-	        this.brokerService = brokerService;
+	        this.cookService = cookService;
 	        // If we navigated to this page, we will have an item available as a nav param
 	        this.selectedItem = navParams.get('item');
 	    }
 
-	    _createClass(BrokerListPage, [{
+	    _createClass(CookListPage, [{
 	        key: 'ngOnInit',
 	        value: function ngOnInit() {
 	            var _this = this;
 
-	            this.brokerService.findAll().subscribe(function (data) {
-	                return _this.brokers = data;
+	            this.cookService.findAll().subscribe(function (data) {
+	                return _this.cooks = data;
 	            });
 	        }
 	    }, {
 	        key: 'itemTapped',
-	        value: function itemTapped(event, broker) {
-	            this.nav.push(_brokerDetails.BrokerDetailsPage, {
-	                broker: broker
+	        value: function itemTapped(event, cook) {
+	            this.nav.push(_cookDetails.CookDetailsPage, {
+	                cook: cook
 	            });
 	        }
 	    }]);
 
-	    return BrokerListPage;
+	    return CookListPage;
 	}()) || _class);
 
 /***/ },
@@ -71430,9 +71441,9 @@
 
 	var _ionic = __webpack_require__(5);
 
-	var _propertyDetails = __webpack_require__(360);
+	var _mealDetails = __webpack_require__(360);
 
-	var _propertyService = __webpack_require__(591);
+	var _mealService = __webpack_require__(591);
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -71442,15 +71453,15 @@
 	    _createClass(FavoriteListPage, null, [{
 	        key: 'parameters',
 	        get: function get() {
-	            return [[_ionic.NavController], [_ionic.NavParams], [_propertyService.PropertyService]];
+	            return [[_ionic.NavController], [_ionic.NavParams], [_mealService.MealService]];
 	        }
 	    }]);
 
-	    function FavoriteListPage(nav, navParams, propertyService) {
+	    function FavoriteListPage(nav, navParams, mealService) {
 	        _classCallCheck(this, FavoriteListPage);
 
 	        this.nav = nav;
-	        this.propertyService = propertyService;
+	        this.mealService = mealService;
 	        this.selectedItem = navParams.get('item');
 	    }
 
@@ -71459,21 +71470,21 @@
 	        value: function ngOnInit() {
 	            var _this = this;
 
-	            this.propertyService.getFavorites().subscribe(function (data) {
-	                return _this.properties = data;
+	            this.mealService.getFavorites().subscribe(function (data) {
+	                return _this.meals = data;
 	            });
 	        }
 	    }, {
 	        key: 'itemTapped',
-	        value: function itemTapped(event, property) {
-	            this.nav.push(_propertyDetails.PropertyDetailsPage, {
-	                property: property
+	        value: function itemTapped(event, meal) {
+	            this.nav.push(_mealDetails.MealDetailsPage, {
+	                meal: meal
 	            });
 	        }
 	    }, {
 	        key: 'deleteItem',
-	        value: function deleteItem(event, property) {
-	            this.propertyService.unfavorite(property).subscribe();
+	        value: function deleteItem(event, meal) {
+	            this.mealService.unfavorite(meal).subscribe();
 	        }
 	    }]);
 

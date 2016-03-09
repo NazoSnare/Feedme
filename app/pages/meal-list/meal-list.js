@@ -4,9 +4,9 @@ import {MealDetailsPage} from '../meal-details/meal-details';
 import {MealService} from '../../services/meal-service';
 
 @Page({
-    templateUrl: 'build/pages/favorite-list/favorite-list.html'
+    templateUrl: 'build/pages/meal-list/meal-list.html'
 })
-export class FavoriteListPage {
+export class MealListPage {
 
     static get parameters() {
         return [[NavController], [NavParams], [MealService]];
@@ -19,7 +19,7 @@ export class FavoriteListPage {
     }
 
     ngOnInit() {
-        this.mealService.getFavorites().subscribe(
+        this.mealService.findAll().subscribe(
             data => this.meals = data
         );
     }
@@ -29,9 +29,11 @@ export class FavoriteListPage {
             meal: meal
         });
     }
-
-    deleteItem(event, meal) {
-        this.mealService.unfavorite(meal).subscribe();
+    
+    doRefresh(refresher) {
+        setTimeout(() => {
+            refresher.complete();
+        }, 2000);
     }
 
 }

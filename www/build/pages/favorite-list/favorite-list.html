@@ -7,8 +7,8 @@
 
 <ion-content>
     <ion-list>
-        <ion-item-sliding *ngFor="#property of properties">
-            <button ion-item (click)="itemTapped($event, property)">
+        <ion-item-sliding *ngFor="#meal of meals">
+            <button ion-item (click)="itemTapped($event, meal)">
                 <ion-thumbnail item-left>
                     <img src="http://jimenaexperience.org/tunisia/files/2012/12/couscous.jpg"/>
                 </ion-thumbnail>
@@ -16,7 +16,7 @@
                 <p>Delicious couscous made with vegetables and...</p>
             </button>
             <ion-item-options>
-                <button danger (click)="deleteItem($event, property)">Delete</button>
+                <button danger (click)="deleteItem($event, meal)">Delete</button>
             </ion-item-options>
         </ion-item-sliding>
     </ion-list>

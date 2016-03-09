@@ -15,11 +15,11 @@
         <ion-refresher-content></ion-refresher-content>
     </ion-refresher>
     <ion-list> 
-            <ion-card *ngFor="#property of properties">
+            <ion-card *ngFor="#meal of meals">
                 
                 <img src="http://jimenaexperience.org/tunisia/files/2012/12/couscous.jpg">
                     
-                <ion-card-content (click)="itemTapped($event, property)">
+                <ion-card-content (click)="itemTapped($event, meal)">
                     <ion-card-title>Couscous</ion-card-title>
                     <p>Delicious couscous made with vegetables and...</p>
                 </ion-card-content>

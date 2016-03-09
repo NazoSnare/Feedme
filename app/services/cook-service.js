@@ -4,10 +4,10 @@ import {SERVER_URL} from './config';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/Rx';
 
-let brokersURL = SERVER_URL + 'brokers/';
+let cooksURL = SERVER_URL + 'cooks/';
 
 @Injectable()
-export class BrokerService {
+export class CookService {
 
     static get parameters() {
         return [[Http]];
@@ -18,13 +18,13 @@ export class BrokerService {
     }
 
     findAll() {
-        return this.http.get(brokersURL)
+        return this.http.get(cooksURL)
             .map(res => res.json())
             .catch(this.handleError);
     }
 
     findById(id) {
-        return this.http.get(brokersURL + id)
+        return this.http.get(cooksURL + id)
             .map(res => res.json())
             .catch(this.handleError);
     }

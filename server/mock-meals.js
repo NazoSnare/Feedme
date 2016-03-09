@@ -8,10 +8,10 @@ exports.data = [
             beds: 2,
             baths: 2,
             likes: 5,
-            broker: {
+            cook: {
                 id: 1,
                 name: "Caroline Kingsley",
-                title: "Senior Broker",
+                title: "Senior Cook",
                 picture: "https://s3-us-west-1.amazonaws.com/sfdc-demo/people/caroline_kingsley.jpg"
             },
             pic: 'https://s3-us-west-1.amazonaws.com/sfdc-demo/realty/house08wide.jpg',
@@ -27,10 +27,10 @@ exports.data = [
             beds: 5,
             baths: 4,
             likes: 2,
-            broker: {
+            cook: {
                 id: 2,
                 name: "Michael Jones",
-                title: "Senior Broker",
+                title: "Senior Cook",
                 picture: "https://s3-us-west-1.amazonaws.com/sfdc-demo/people/michael_jones.jpg"
             },
             pic: 'https://s3-us-west-1.amazonaws.com/sfdc-demo/realty/house02wide.jpg',
@@ -46,10 +46,10 @@ exports.data = [
             beds: 3,
             baths: 2,
             likes: 6,
-            broker: {
+            cook: {
                 id: 3,
                 name: "Jonathan Bradley",
-                title: "Senior Broker",
+                title: "Senior Cook",
                 picture: "https://s3-us-west-1.amazonaws.com/sfdc-demo/people/jonathan_bradley.jpg"
             },
             pic: 'https://s3-us-west-1.amazonaws.com/sfdc-demo/realty/house09wide.jpg',
@@ -65,10 +65,10 @@ exports.data = [
             beds: 3,
             baths: 2,
             likes: 12,
-            broker: {
+            cook: {
                 id: 4,
                 name: "Jennifer Wu",
-                title: "Senior Broker",
+                title: "Senior Cook",
                 picture: "https://s3-us-west-1.amazonaws.com/sfdc-demo/people/jennifer_wu.jpg"
             },
             pic: 'https://s3-us-west-1.amazonaws.com/sfdc-demo/realty/house14.jpg',
@@ -85,10 +85,10 @@ exports.data = [
             beds: 4,
             baths: 2,
             likes: 5,
-            broker: {
+            cook: {
                 id: 5,
                 name: "Olivia Green",
-                title: "Senior Broker",
+                title: "Senior Cook",
                 picture: "https://s3-us-west-1.amazonaws.com/sfdc-demo/people/olivia_green.jpg"
             },
             pic: 'https://s3-us-west-1.amazonaws.com/sfdc-demo/realty/house03wide.jpg',
@@ -104,10 +104,10 @@ exports.data = [
             beds: 3,
             baths: 2,
             likes: 14,
-            broker: {
+            cook: {
                 id: 6,
                 name: "Miriam Aupont",
-                title: "Senior Broker",
+                title: "Senior Cook",
                 picture: "https://s3-us-west-1.amazonaws.com/sfdc-demo/people/miriam_aupont.jpg"
             },
             pic: 'https://s3-us-west-1.amazonaws.com/sfdc-demo/realty/house05wide.jpg',
@@ -124,10 +124,10 @@ exports.data = [
             beds: 5,
             baths: 4,
             likes: 5,
-            broker: {
+            cook: {
                 id: 7,
                 name: "Michelle Lambert",
-                title: "Senior Broker",
+                title: "Senior Cook",
                 picture: "https://s3-us-west-1.amazonaws.com/sfdc-demo/people/michelle_lambert.jpg"
             },
             pic: 'https://s3-us-west-1.amazonaws.com/sfdc-demo/realty/house07wide.jpg',
@@ -145,10 +145,10 @@ exports.data = [
             baths: 6,
             sqft: 950,
             likes: 8,
-            broker: {
+            cook: {
                 id: 8,
                 name: "Victor Oachoa",
-                title: "Senior Broker",
+                title: "Senior Cook",
                 picture: "https://s3-us-west-1.amazonaws.com/sfdc-demo/people/victor_ochoa.jpg"
             },
             pic: 'https://s3-us-west-1.amazonaws.com/sfdc-demo/realty/house12wide.jpg',
@@ -165,10 +165,10 @@ exports.data = [
             beds: 5,
             baths: 4,
             likes: 9,
-            broker: {
+            cook: {
                 id: 1,
                 name: "Caroline Kingsley",
-                title: "Senior Broker",
+                title: "Senior Cook",
                 picture: "https://s3-us-west-1.amazonaws.com/sfdc-demo/people/caroline_kingsley.jpg"
             },
             pic: 'https://s3-us-west-1.amazonaws.com/sfdc-demo/realty/house10.jpg',
@@ -185,10 +185,10 @@ exports.data = [
             beds: 2,
             baths: 2,
             likes: 10,
-            broker: {
+            cook: {
                 id: 2,
                 name: "Michael Jones",
-                title: "Senior Broker",
+                title: "Senior Cook",
                 picture: "https://s3-us-west-1.amazonaws.com/sfdc-demo/people/michael_jones.jpg"
             },
             pic: 'https://s3-us-west-1.amazonaws.com/sfdc-demo/realty/house11wide.jpg',
@@ -205,10 +205,10 @@ exports.data = [
             beds: 2,
             baths: 2,
             likes: 16,
-            broker: {
+            cook: {
                 id: 3,
                 name: "Jonathan Bradley",
-                title: "Senior Broker",
+                title: "Senior Cook",
                 picture: "https://s3-us-west-1.amazonaws.com/sfdc-demo/people/jonathan_bradley.jpg"
             },
             pic: 'https://s3-us-west-1.amazonaws.com/sfdc-demo/realty/house13wide.jpg',
@@ -225,10 +225,10 @@ exports.data = [
             beds: 4,
             baths: 2,
             likes: 9,
-            broker: {
+            cook: {
                 id: 4,
                 name: "Jennifer Wu",
-                title: "Senior Broker",
+                title: "Senior Cook",
                 picture: "https://s3-us-west-1.amazonaws.com/sfdc-demo/people/jennifer_wu.jpg"
             },
             pic: 'https://s3-us-west-1.amazonaws.com/sfdc-demo/realty/house06wide.jpg',
@@ -245,10 +245,10 @@ exports.data = [
             beds: 5,
             baths:4,
             likes: 18,
-            broker: {
+            cook: {
                 id: 5,
                 name: "Olivia Green",
-                title: "Senior Broker",
+                title: "Senior Cook",
                 picture: "https://s3-us-west-1.amazonaws.com/sfdc-demo/people/olivia_green.jpg"
             },
             pic: 'https://s3-us-west-1.amazonaws.com/sfdc-demo/realty/house04.jpg',
@@ -266,10 +266,10 @@ exports.data = [
             baths:3,
             sqft: 3800,
             likes: 10,
-            broker: {
+            cook: {
                 id: 6,
                 name: "Miriam Aupont",
-                title: "Senior Broker",
+                title: "Senior Cook",
                 picture: "https://s3-us-west-1.amazonaws.com/sfdc-demo/people/miriam_aupont.jpg"
             },
             pic: 'https://s3-us-west-1.amazonaws.com/sfdc-demo/realty/house01wide.jpg',

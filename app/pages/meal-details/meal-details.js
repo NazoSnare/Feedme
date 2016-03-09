@@ -1,29 +1,29 @@
 import {Page, NavController, NavParams, Alert, ActionSheet} from 'ionic-framework/ionic';
-import {BrokerDetailsPage} from '../broker-details/broker-details';
-import {PropertyService} from '../../services/property-service';
+import {CookDetailsPage} from '../cook-details/cook-details';
+import {MealService} from '../../services/meal-service';
 
 @Page({
-    templateUrl: 'build/pages/property-details/property-details.html'
+    templateUrl: 'build/pages/meal-details/meal-details.html'
 })
-export class PropertyDetailsPage {
+export class MealDetailsPage {
 
     static get parameters() {
-        return [[NavController], [NavParams], [PropertyService]];
+        return [[NavController], [NavParams], [MealService]];
     }
 
-    constructor(nav, navParams, propertyService) {
+    constructor(nav, navParams, mealService) {
         this.nav = nav;
-        this.propertyService = propertyService;
-        this.property = navParams.get('property');
+        this.mealService = mealService;
+        this.meal = navParams.get('meal');
     }
 
-    favorite(event, property) {
+    favorite(event, meal) {
 
-        this.propertyService.favorite(property).subscribe(
-            property => {
+        this.mealService.favorite(meal).subscribe(
+            meal => {
                 let alert = Alert.create({
                     title: 'Favorites',
-                    subTitle: 'Property added to your favorites',
+                    subTitle: 'Meal added to your favorites',
                     buttons: ['OK']
                 });
                 this.nav.present(alert);
@@ -32,17 +32,17 @@ export class PropertyDetailsPage {
 
     }
 
-    like(event, property) {
+    like(event, meal) {
 
-        this.propertyService.like(property).subscribe(
+        this.mealService.like(meal).subscribe(
             likes => {
-                property.likes = likes;
+                meal.likes = likes;
             }
         );
 
     }
 
-    share(event, property) {
+    share(event, meal) {
         let actionSheet = ActionSheet.create({
             buttons: [
                 {
@@ -81,9 +81,9 @@ export class PropertyDetailsPage {
         this.nav.present(actionSheet);
     }
 
-    showBroker(event, broker) {
-        this.nav.push(BrokerDetailsPage, {
-            broker: broker
+    showCook(event, cook) {
+        this.nav.push(CookDetailsPage, {
+            cook: cook
         });
     }
     

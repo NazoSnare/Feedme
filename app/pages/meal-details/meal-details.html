@@ -5,8 +5,8 @@
     <ion-title>Couscous</ion-title>
 </ion-navbar>
 
-<ion-content class="property">
-    <div *ngIf="property" class="selection">
+<ion-content class="meal">
+    <div *ngIf="meal" class="selection">
         <ion-card>
             <img src="http://jimenaexperience.org/tunisia/files/2012/12/couscous.jpg"/>
             <ion-card-content>
@@ -35,7 +35,7 @@
                     <ion-note item-right>$5.99</ion-note>
                 </button>
                 
-                <button ion-item (click)="showBroker($event, property.broker)">
+                <button ion-item (click)="showCook($event, meal.cook)">
                     <ion-avatar item-left>
                         <img src="https://media.licdn.com/mpr/mpr/shrinknp_200_200/AAEAAQAAAAAAAAStAAAAJDg4ODE0NzlkLWQ0ZjAtNDY0Ni1hNzBiLTNkMTJhNzdmNzI3NQ.jpg"/>
                     </ion-avatar>
@@ -46,19 +46,19 @@
             </ion-list>
             <ion-row no-padding>
                 <ion-col>
-                    <button clear small (click)="favorite($event, property)">
+                    <button clear small (click)="favorite($event, meal)">
                         <ion-icon name="star"></ion-icon>
                         Favorite
                     </button>
                 </ion-col>
                 <ion-col text-center>
-                    <button clear small (click)="like($event, property)">
+                    <button clear small (click)="like($event, meal)">
                         <ion-icon name="thumbs-up"></ion-icon>
                         Like
                     </button>
                 </ion-col>
                 <ion-col text-right>
-                    <button clear small (click)="share($event, property)">
+                    <button clear small (click)="share($event, meal)">
                         <ion-icon name="share-alt"></ion-icon>
                         Share
                     </button>

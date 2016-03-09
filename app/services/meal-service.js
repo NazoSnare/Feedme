@@ -5,12 +5,12 @@ import {Observable} from 'rxjs/Observable';
 import 'rxjs/Rx';
 
 let favorites = [],
-    propertiesURL = SERVER_URL + 'properties/',
-    favoritesURL = propertiesURL + 'favorites/',
-    likesURL = propertiesURL + 'likes/';
+    mealsURL = SERVER_URL + 'meals/',
+    favoritesURL = mealsURL + 'favorites/',
+    likesURL = mealsURL + 'likes/';
 
 @Injectable()
-export class PropertyService {
+export class MealService {
 
     static get parameters() {
         return [[Http]];
@@ -21,7 +21,7 @@ export class PropertyService {
     }
 
     findAll() {
-        return this.http.get(propertiesURL)
+        return this.http.get(mealsURL)
             .map(res => res.json())
             .catch(this.handleError);
     }
@@ -32,8 +32,8 @@ export class PropertyService {
             .catch(this.handleError);
     }
 
-    like(property) {
-        let body = JSON.stringify(property);
+    like(meal) {
+        let body = JSON.stringify(meal);
         let headers = new Headers({ 'Content-Type': 'application/json' });
         let options = new RequestOptions({ headers: headers });
         return this.http.post(likesURL, body, options)
@@ -41,16 +41,16 @@ export class PropertyService {
             .catch(this.handleError);
     }
 
-    favorite(property) {
-        let body = JSON.stringify(property);
+    favorite(meal) {
+        let body = JSON.stringify(meal);
         let headers = new Headers({ 'Content-Type': 'application/json' });
         let options = new RequestOptions({ headers: headers });
         return this.http.post(favoritesURL, body, options)
             .catch(this.handleError);
     }
 
-    unfavorite(property) {
-        return this.http.delete(favoritesURL + property.id)
+    unfavorite(meal) {
+        return this.http.delete(favoritesURL + meal.id)
             .map(res => res.json())
             .catch(this.handleError);
     }

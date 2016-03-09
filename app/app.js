@@ -1,15 +1,16 @@
 import {App, IonicApp, Platform} from 'ionic-framework/ionic';
+//import {Storage, LocalStorage} from 'ionic-framework';
 import {WelcomePage} from './pages/welcome/welcome';
-import {PropertyListPage} from './pages/property-list/property-list';
-import {BrokerListPage} from './pages/broker-list/broker-list';
+import {MealListPage} from './pages/meal-list/meal-list';
+import {CookListPage} from './pages/cook-list/cook-list';
 import {FavoriteListPage} from './pages/favorite-list/favorite-list';
-import {PropertyService} from './services/property-service';
-import {BrokerService} from './services/broker-service';
+import {MealService} from './services/meal-service';
+import {CookService} from './services/cook-service';
 
 @App({
     templateUrl: 'build/app.html',
     config: {},
-    providers: [PropertyService, BrokerService]
+    providers: [MealService, CookService]
 })
 class MyApp {
 
@@ -27,13 +28,23 @@ class MyApp {
         // set our app's pages
         this.pages = [
             {title: 'Welcome', component: WelcomePage, icon: "bookmark"},
-            {title: 'Meals', component: PropertyListPage, icon: "home"},
-            {title: 'Cooks', component: BrokerListPage, icon: "people"},
+            {title: 'Meals', component: MealListPage, icon: "home"},
+            {title: 'Cooks', component: CookListPage, icon: "people"},
             {title: 'Favorites', component: FavoriteListPage, icon: "star"}
         ];
-
-        // make PropertyListPage the root (or first) page
+        
+        /*
+        this.local = new Storage(LocalStorage);
+        if (!this.local.get('firstLaunch')) {
+            this.rootPage = WelcomePage;
+        } else {
+            this.local.set('firstLaunch', false);
+            this.rootPage = MealListPage;
+        }
+        */
+        
         this.rootPage = WelcomePage;
+        
     }
 
     initializeApp() {

@@ -2,8 +2,8 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     compression = require('compression'),
     cors = require('cors'),
-    properties = require('./server/property-service'),
-    brokers = require('./server/broker-service'),
+    meals = require('./server/meal-service'),
+    cooks = require('./server/cook-service'),
     app = express();
 
 app.set('port', process.env.PORT || 5000);
@@ -14,16 +14,16 @@ app.use(compression());
 
 app.use('/', express.static(__dirname + '/www'));
 
-app.get('/properties', properties.findAll);
-app.get('/properties/favorites', properties.getFavorites);
-app.get('/properties/:id', properties.findById);
-app.post('/properties/likes', properties.like);
-app.post('/properties/favorites', properties.favorite);
-app.delete('/properties/favorites/:id', properties.unfavorite);
+app.get('/meals', meals.findAll);
+app.get('/meals/favorites', meals.getFavorites);
+app.get('/meals/:id', meals.findById);
+app.post('/meals/likes', meals.like);
+app.post('/meals/favorites', meals.favorite);
+app.delete('/meals/favorites/:id', meals.unfavorite);
 
-app.get('/brokers', brokers.findAll);
-app.get('/brokers/:id', brokers.findById);
+app.get('/cooks', cooks.findAll);
+app.get('/cooks/:id', cooks.findById);
 
 app.listen(app.get('port'), function () {
-    console.log('Realty server listening on port ' + app.get('port'));
+    console.log('Feedme server listening on port ' + app.get('port'));
 });

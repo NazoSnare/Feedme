@@ -1,14 +1,14 @@
-var PROPERTIES = require('./mock-properties').data,
+var MEALS = require('./mock-meals').data,
     favorites = [];
 
 function findAll(req, res, next) {
-    return res.json(PROPERTIES);
+    return res.json(MEALS);
 
 };
 
 function findById(req, res, next) {
     var id = req.params.id;
-    res.json(PROPERTIES[id - 1]);
+    res.json(MEALS[id - 1]);
 }
 
 function getFavorites(req, res, next) {
@@ -16,15 +16,15 @@ function getFavorites(req, res, next) {
 }
 
 function favorite(req, res, next) {
-    var property = req.body;
+    var meal = req.body;
     var exists = false;
     for (var i = 0; i < favorites.length; i++) {
-        if (favorites[i].id === property.id) {
+        if (favorites[i].id === meal.id) {
             exists = true;
             break;
         }
     }
-    if (!exists) favorites.push(property);
+    if (!exists) favorites.push(meal);
     res.send("success")
 }
 
@@ -40,9 +40,9 @@ function unfavorite(req, res, next) {
 }
 
 function like(req, res, next) {
-    var property = req.body;
-    PROPERTIES[property.id - 1].likes++;
-    res.json(PROPERTIES[property.id - 1].likes);
+    var meal = req.body;
+    MEALS[meal.id - 1].likes++;
+    res.json(MEALS[meal.id - 1].likes);
 }
 
 exports.findAll = findAll;
