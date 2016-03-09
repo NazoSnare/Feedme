@@ -1,0 +1,69 @@
+<ion-navbar *navbar>
+    <button menuToggle>
+        <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title>Couscous</ion-title>
+</ion-navbar>
+
+<ion-content class="property">
+    <div *ngIf="property" class="selection">
+        <ion-card>
+            <img src="http://jimenaexperience.org/tunisia/files/2012/12/couscous.jpg"/>
+            <ion-card-content>
+                <h2 class="card-title">
+                    Couscous
+                </h2>
+                <p>
+                    Delicious couscous made with vegetables and meat with red sauce.
+                </p>
+            </ion-card-content>
+            <ion-list>
+                <button ion-item (click)="showIngredients($event)">
+                    <ion-icon item-left name="nutrition"></ion-icon>
+                    <h3>Show Ingredients</h3>
+                </button>
+                
+                <button ion-item (click)="showMap($event)">
+                    <ion-icon item-left name="navigate"></ion-icon>
+                    <h3>Show Map</h3>
+                    <ion-note item right>268m away</ion-note>
+                </button>
+                
+                <button ion-item>
+                    <ion-icon item-left name="pricetag"></ion-icon>
+                    <h3>Buy</h3>
+                    <ion-note item-right>$5.99</ion-note>
+                </button>
+                
+                <button ion-item (click)="showBroker($event, property.broker)">
+                    <ion-avatar item-left>
+                        <img src="https://media.licdn.com/mpr/mpr/shrinknp_200_200/AAEAAQAAAAAAAAStAAAAJDg4ODE0NzlkLWQ0ZjAtNDY0Ni1hNzBiLTNkMTJhNzdmNzI3NQ.jpg"/>
+                    </ion-avatar>
+                    <h2>Yanis Ikene</h2>
+                    <p>Apprentice cook</p>
+                </button>
+                
+            </ion-list>
+            <ion-row no-padding>
+                <ion-col>
+                    <button clear small (click)="favorite($event, property)">
+                        <ion-icon name="star"></ion-icon>
+                        Favorite
+                    </button>
+                </ion-col>
+                <ion-col text-center>
+                    <button clear small (click)="like($event, property)">
+                        <ion-icon name="thumbs-up"></ion-icon>
+                        Like
+                    </button>
+                </ion-col>
+                <ion-col text-right>
+                    <button clear small (click)="share($event, property)">
+                        <ion-icon name="share-alt"></ion-icon>
+                        Share
+                    </button>
+                </ion-col>
+            </ion-row>
+        </ion-card>
+    </div>
+</ion-content>
