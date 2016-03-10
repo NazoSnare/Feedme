@@ -9211,3 +9211,10 @@ body {
     .cook ion-card ion-card-content h3 {
       font-size: 1.8rem;
       color: white; }
+
+.scroll {
+  height: 100%; }
+
+#map {
+  width: 100%;
+  height: 100%; }

@@ -17,11 +17,11 @@
     <ion-list> 
             <ion-card *ngFor="#meal of meals">
                 
-                <img src="http://jimenaexperience.org/tunisia/files/2012/12/couscous.jpg">
+                <img src="{{meal.picture}}">
                     
                 <ion-card-content (click)="itemTapped($event, meal)">
-                    <ion-card-title>Couscous</ion-card-title>
-                    <p>Delicious couscous made with vegetables and...</p>
+                    <ion-card-title>{{meal.title}}</ion-card-title>
+                    <p>{{meal.description}}</p>
                 </ion-card-content>
 
                 <ion-row no-padding>

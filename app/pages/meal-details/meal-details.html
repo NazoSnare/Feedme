@@ -11,10 +11,10 @@
             <img src="http://jimenaexperience.org/tunisia/files/2012/12/couscous.jpg"/>
             <ion-card-content>
                 <h2 class="card-title">
-                    Couscous
+                    {{meal.title}}
                 </h2>
                 <p>
-                    Delicious couscous made with vegetables and meat with red sauce.
+                    {{meal.description}}
                 </p>
             </ion-card-content>
             <ion-list>
@@ -39,8 +39,8 @@
                     <ion-avatar item-left>
                         <img src="https://media.licdn.com/mpr/mpr/shrinknp_200_200/AAEAAQAAAAAAAAStAAAAJDg4ODE0NzlkLWQ0ZjAtNDY0Ni1hNzBiLTNkMTJhNzdmNzI3NQ.jpg"/>
                     </ion-avatar>
-                    <h2>Yanis Ikene</h2>
-                    <p>Apprentice cook</p>
+                    <h2>{{meal.cook.name}}</h2>
+                    <p>{{meal.cook.title}}</p>
                 </button>
                 
             </ion-list>

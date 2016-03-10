@@ -31,9 +31,10 @@ export class MealListPage {
     }
     
     doRefresh(refresher) {
-        setTimeout(() => {
+        this.mealService.findAll().subscribe((data) => {
+            this.meals = data;
             refresher.complete();
-        }, 2000);
+        });
     }
 
 }

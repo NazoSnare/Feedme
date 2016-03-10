@@ -3187,11 +3187,13 @@
 
 	var _welcome = __webpack_require__(358);
 
-	var _mealList = __webpack_require__(359);
+	var _mealMap = __webpack_require__(359);
 
-	var _cookList = __webpack_require__(592);
+	var _mealList = __webpack_require__(592);
 
-	var _favoriteList = __webpack_require__(593);
+	var _cookList = __webpack_require__(593);
+
+	var _favoriteList = __webpack_require__(594);
 
 	var _mealService = __webpack_require__(591);
 
@@ -3220,8 +3222,9 @@
 	        this.initializeApp();
 
 	        // set our app's pages
-	        this.pages = [{ title: 'Welcome', component: _welcome.WelcomePage, icon: "bookmark" }, { title: 'Meals', component: _mealList.MealListPage, icon: "home" }, { title: 'Cooks', component: _cookList.CookListPage, icon: "people" }, { title: 'Favorites', component: _favoriteList.FavoriteListPage, icon: "star" }];
+	        this.pages = [{ title: 'Welcome', component: _welcome.WelcomePage, icon: "bookmark" }, { title: 'Map', component: _mealMap.MealMapPage, icon: "map" }, { title: 'Meals', component: _mealList.MealListPage, icon: "home" }, { title: 'Cooks', component: _cookList.CookListPage, icon: "people" }, { title: 'Favorites', component: _favoriteList.FavoriteListPage, icon: "star" }];
 
+	        //TODO
 	        /*
 	        this.local = new Storage(LocalStorage);
 	        if (!this.local.get('firstLaunch')) {
@@ -62204,7 +62207,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.MealListPage = undefined;
+	exports.MealMapPage = undefined;
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -62220,50 +62223,95 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var MealListPage = exports.MealListPage = (_dec = (0, _ionic.Page)({
-	    templateUrl: 'build/pages/meal-list/meal-list.html'
+	var MealMapPage = exports.MealMapPage = (_dec = (0, _ionic.Page)({
+	    templateUrl: 'build/pages/meal-map/meal-map.html'
 	}), _dec(_class = function () {
-	    _createClass(MealListPage, null, [{
+	    _createClass(MealMapPage, null, [{
 	        key: 'parameters',
 	        get: function get() {
 	            return [[_ionic.NavController], [_ionic.NavParams], [_mealService.MealService]];
 	        }
 	    }]);
 
-	    function MealListPage(nav, navParams, mealService) {
-	        _classCallCheck(this, MealListPage);
+	    function MealMapPage(nav, navParams, mealService) {
+	        _classCallCheck(this, MealMapPage);
 
 	        this.nav = nav;
 	        this.mealService = mealService;
 	        this.selectedItem = navParams.get('item');
+	        this.map = null;
+	        this.loadMap();
 	    }
 
-	    _createClass(MealListPage, [{
+	    _createClass(MealMapPage, [{
 	        key: 'ngOnInit',
 	        value: function ngOnInit() {
 	            var _this = this;
 
 	            this.mealService.findAll().subscribe(function (data) {
-	                return _this.meals = data;
+	                _this.meals = data;
+	                _this.setMarkers();
 	            });
 	        }
 	    }, {
-	        key: 'itemTapped',
-	        value: function itemTapped(event, meal) {
-	            this.nav.push(_mealDetails.MealDetailsPage, {
-	                meal: meal
+	        key: 'setMarkers',
+	        value: function setMarkers() {
+	            var _this2 = this;
+
+	            this.meals.forEach(function (meal) {
+	                _this2.addMarker(meal);
 	            });
 	        }
 	    }, {
-	        key: 'doRefresh',
-	        value: function doRefresh(refresher) {
-	            setTimeout(function () {
-	                refresher.complete();
-	            }, 2000);
+	        key: 'loadMap',
+	        value: function loadMap() {
+	            var _this3 = this;
+
+	            var options = { timeout: 10000, enableHighAccuracy: true };
+
+	            navigator.geolocation.getCurrentPosition(function (position) {
+	                var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+
+	                var mapOptions = {
+	                    center: latLng,
+	                    zoom: 15,
+	                    mapTypeId: google.maps.MapTypeId.ROADMAP
+	                };
+
+	                _this3.map = new google.maps.Map(document.getElementById("map"), mapOptions);
+	            }, function (error) {
+	                console.log(error);
+	            }, options);
+	        }
+	    }, {
+	        key: 'addMarker',
+	        value: function addMarker(meal) {
+	            if (!meal.coords) {
+	                return;
+	            }
+	            var latLng = new google.maps.LatLng(meal.coords.lat, meal.coords.long);
+	            var marker = new google.maps.Marker({
+	                map: this.map,
+	                animation: google.maps.Animation.DROP,
+	                position: latLng
+	            });
+	            var content = '<h4>' + meal.title + '</h4>';
+	            this.addInfoWindow(marker, content);
+	        }
+	    }, {
+	        key: 'addInfoWindow',
+	        value: function addInfoWindow(marker, content) {
+
+	            var infoWindow = new google.maps.InfoWindow({
+	                content: content
+	            });
+	            google.maps.event.addListener(marker, 'click', function () {
+	                infoWindow.open(this.map, marker);
+	            });
 	        }
 	    }]);
 
-	    return MealListPage;
+	    return MealMapPage;
 	}()) || _class);
 
 /***/ },
@@ -71366,6 +71414,80 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.MealListPage = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _dec, _class;
+
+	var _core = __webpack_require__(7);
+
+	var _ionic = __webpack_require__(5);
+
+	var _mealDetails = __webpack_require__(360);
+
+	var _mealService = __webpack_require__(591);
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var MealListPage = exports.MealListPage = (_dec = (0, _ionic.Page)({
+	    templateUrl: 'build/pages/meal-list/meal-list.html'
+	}), _dec(_class = function () {
+	    _createClass(MealListPage, null, [{
+	        key: 'parameters',
+	        get: function get() {
+	            return [[_ionic.NavController], [_ionic.NavParams], [_mealService.MealService]];
+	        }
+	    }]);
+
+	    function MealListPage(nav, navParams, mealService) {
+	        _classCallCheck(this, MealListPage);
+
+	        this.nav = nav;
+	        this.mealService = mealService;
+	        this.selectedItem = navParams.get('item');
+	    }
+
+	    _createClass(MealListPage, [{
+	        key: 'ngOnInit',
+	        value: function ngOnInit() {
+	            var _this = this;
+
+	            this.mealService.findAll().subscribe(function (data) {
+	                return _this.meals = data;
+	            });
+	        }
+	    }, {
+	        key: 'itemTapped',
+	        value: function itemTapped(event, meal) {
+	            this.nav.push(_mealDetails.MealDetailsPage, {
+	                meal: meal
+	            });
+	        }
+	    }, {
+	        key: 'doRefresh',
+	        value: function doRefresh(refresher) {
+	            var _this2 = this;
+
+	            this.mealService.findAll().subscribe(function (data) {
+	                _this2.meals = data;
+	                refresher.complete();
+	            });
+	        }
+	    }]);
+
+	    return MealListPage;
+	}()) || _class);
+
+/***/ },
+/* 593 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
 	exports.CookListPage = undefined;
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -71423,7 +71545,7 @@
 	}()) || _class);
 
 /***/ },
-/* 593 */
+/* 594 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';

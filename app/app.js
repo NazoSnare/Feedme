@@ -1,6 +1,7 @@
 import {App, IonicApp, Platform} from 'ionic-framework/ionic';
 //import {Storage, LocalStorage} from 'ionic-framework';
 import {WelcomePage} from './pages/welcome/welcome';
+import {MealMapPage} from './pages/meal-map/meal-map';
 import {MealListPage} from './pages/meal-list/meal-list';
 import {CookListPage} from './pages/cook-list/cook-list';
 import {FavoriteListPage} from './pages/favorite-list/favorite-list';
@@ -28,11 +29,13 @@ class MyApp {
         // set our app's pages
         this.pages = [
             {title: 'Welcome', component: WelcomePage, icon: "bookmark"},
+            {title: 'Map', component: MealMapPage, icon: "map"},
             {title: 'Meals', component: MealListPage, icon: "home"},
             {title: 'Cooks', component: CookListPage, icon: "people"},
             {title: 'Favorites', component: FavoriteListPage, icon: "star"}
         ];
         
+        //TODO
         /*
         this.local = new Storage(LocalStorage);
         if (!this.local.get('firstLaunch')) {
