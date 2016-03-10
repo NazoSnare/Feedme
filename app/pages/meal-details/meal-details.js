@@ -1,5 +1,6 @@
 import {Page, NavController, NavParams, Alert, ActionSheet} from 'ionic-framework/ionic';
 import {CookDetailsPage} from '../cook-details/cook-details';
+import {MealMapPage} from '../meal-map/meal-map';
 import {MealService} from '../../services/meal-service';
 
 @Page({
@@ -92,6 +93,8 @@ export class MealDetailsPage {
     }
 
     showMap(event) {
-        
+       this.nav.push(MealMapPage, {
+            meal: this.meal
+        }); 
     }
 }

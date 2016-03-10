@@ -15,44 +15,56 @@ export class MealMapPage {
   constructor(nav, navParams, mealService) {
     this.nav = nav;
     this.mealService = mealService;
-    this.selectedItem = navParams.get('item');
+    this.selectedMeal = navParams.get('meal');
     this.map = null;
-    this.loadMap();
   }
   
   ngOnInit() {
-    this.mealService.findAll().subscribe((data) => {
-        this.meals = data;
-        this.setMarkers();
+    this.loadMap().then(() => {
+        if (this.selectedMeal) {
+            //Find the meal (in this case, it is already complete)
+            this.setDirection(this.selectedMeal);
+        } else {
+            this.mealService.findAll().subscribe((data) => {
+                this.meals = data;
+                this.setMarkers();
+            });   
+        }
     });
-  }
-  
-  setMarkers() {
-      this.meals.forEach((meal) => {
-          this.addMarker(meal);
-      });
   }
  
   loadMap(){
  
-    let options = {timeout: 10000, enableHighAccuracy: true};
- 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-          let latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
- 
-          let mapOptions = {
-              center: latLng,
-              zoom: 15,
-              mapTypeId: google.maps.MapTypeId.ROADMAP
-          }
- 
-          this.map = new google.maps.Map(document.getElementById("map"), mapOptions);
-      },
-      (error) => {
-          console.log(error);
-      }, options
-    ); 
+    return new Promise( (resolve, reject) => {
+        let options = {timeout: 10000, enableHighAccuracy: true};
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                this.currentPosition = position;
+                let latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                let mapOptions = {
+                    center: latLng,
+                    zoom: 15,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP
+                }
+                this.map = new google.maps.Map(document.getElementById("map"), mapOptions);
+                return resolve();
+            },
+            (error) => {
+                console.log(error);
+                return reject();
+            }, options
+        ); 
+    });
+    
+  }
+  
+  setMarkers() {
+      if (this.selectedMeal) {
+          this.addMarker(selectedMeal);
+      }
+      this.meals.forEach((meal) => {
+          this.addMarker(meal);
+      });
   }
   
   addMarker(meal){
@@ -63,19 +75,53 @@ export class MealMapPage {
     let marker = new google.maps.Marker({
         map: this.map,
         animation: google.maps.Animation.DROP,
-        position: latLng
+        position: latLng,
+        icon: 'images/food-icon-map.png'
     });
-    let content = `<h4>${meal.title}</h4>`;          
-    this.addInfoWindow(marker, content);
+    let content = `<p (click)="showMealDetails()">${meal.title}</p><img src="${meal.picture}" height="64" width="64">`;          
+    this.addInfoWindow(marker, content, meal);
   }
   
-  addInfoWindow(marker, content){
+  addInfoWindow(marker, content, meal){
  
     let infoWindow = new google.maps.InfoWindow({
         content: content
     });
     google.maps.event.addListener(marker, 'click', function(){
         infoWindow.open(this.map, marker);
+        this.tappedMeal = meal;
     });
+  }
+  
+  setDirection(meal) {
+    let directionsDisplay = new google.maps.DirectionsRenderer({
+        map: this.map
+    });
+    
+    let origin = new google.maps.LatLng(this.currentPosition.coords.latitude, this.currentPosition.coords.longitude);
+    let destination = new google.maps.LatLng(meal.coords.lat, meal.coords.long);
+    
+    // Set destination, origin and travel mode.
+    let request = {
+        destination: destination,
+        origin: origin,
+        travelMode: google.maps.TravelMode.WALKING
+    };
+
+    // Pass the directions request to the directions service.
+    let directionsService = new google.maps.DirectionsService();
+    directionsService.route(request, function(response, status) {
+        if (status == google.maps.DirectionsStatus.OK) {
+            // Display the route on the map.
+            directionsDisplay.setDirections(response);
+        }
+    });
+  }
+  
+  showMealDetails(meal) {
+    this.nav.push(MealDetailsPage, {
+        meal: meal || this.tappedMeal
+    }); 
+      
   }
 }

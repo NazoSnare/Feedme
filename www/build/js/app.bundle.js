@@ -62238,9 +62238,8 @@
 
 	        this.nav = nav;
 	        this.mealService = mealService;
-	        this.selectedItem = navParams.get('item');
+	        this.selectedMeal = navParams.get('meal');
 	        this.map = null;
-	        this.loadMap();
 	    }
 
 	    _createClass(MealMapPage, [{
@@ -62248,40 +62247,52 @@
 	        value: function ngOnInit() {
 	            var _this = this;
 
-	            this.mealService.findAll().subscribe(function (data) {
-	                _this.meals = data;
-	                _this.setMarkers();
-	            });
-	        }
-	    }, {
-	        key: 'setMarkers',
-	        value: function setMarkers() {
-	            var _this2 = this;
-
-	            this.meals.forEach(function (meal) {
-	                _this2.addMarker(meal);
+	            this.loadMap().then(function () {
+	                if (_this.selectedMeal) {
+	                    //Find the meal (in this case, it is already complete)
+	                    _this.setDirection(_this.selectedMeal);
+	                } else {
+	                    _this.mealService.findAll().subscribe(function (data) {
+	                        _this.meals = data;
+	                        _this.setMarkers();
+	                    });
+	                }
 	            });
 	        }
 	    }, {
 	        key: 'loadMap',
 	        value: function loadMap() {
+	            var _this2 = this;
+
+	            return new Promise(function (resolve, reject) {
+	                var options = { timeout: 10000, enableHighAccuracy: true };
+	                navigator.geolocation.getCurrentPosition(function (position) {
+	                    _this2.currentPosition = position;
+	                    var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+	                    var mapOptions = {
+	                        center: latLng,
+	                        zoom: 15,
+	                        mapTypeId: google.maps.MapTypeId.ROADMAP
+	                    };
+	                    _this2.map = new google.maps.Map(document.getElementById("map"), mapOptions);
+	                    return resolve();
+	                }, function (error) {
+	                    console.log(error);
+	                    return reject();
+	                }, options);
+	            });
+	        }
+	    }, {
+	        key: 'setMarkers',
+	        value: function setMarkers() {
 	            var _this3 = this;
 
-	            var options = { timeout: 10000, enableHighAccuracy: true };
-
-	            navigator.geolocation.getCurrentPosition(function (position) {
-	                var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-
-	                var mapOptions = {
-	                    center: latLng,
-	                    zoom: 15,
-	                    mapTypeId: google.maps.MapTypeId.ROADMAP
-	                };
-
-	                _this3.map = new google.maps.Map(document.getElementById("map"), mapOptions);
-	            }, function (error) {
-	                console.log(error);
-	            }, options);
+	            if (this.selectedMeal) {
+	                this.addMarker(selectedMeal);
+	            }
+	            this.meals.forEach(function (meal) {
+	                _this3.addMarker(meal);
+	            });
 	        }
 	    }, {
 	        key: 'addMarker',
@@ -62293,20 +62304,55 @@
 	            var marker = new google.maps.Marker({
 	                map: this.map,
 	                animation: google.maps.Animation.DROP,
-	                position: latLng
+	                position: latLng,
+	                icon: 'images/food-icon-map.png'
 	            });
-	            var content = '<h4>' + meal.title + '</h4>';
-	            this.addInfoWindow(marker, content);
+	            var content = '<p (click)="showMealDetails()">' + meal.title + '</p><img src="' + meal.picture + '" height="64" width="64">';
+	            this.addInfoWindow(marker, content, meal);
 	        }
 	    }, {
 	        key: 'addInfoWindow',
-	        value: function addInfoWindow(marker, content) {
+	        value: function addInfoWindow(marker, content, meal) {
 
 	            var infoWindow = new google.maps.InfoWindow({
 	                content: content
 	            });
 	            google.maps.event.addListener(marker, 'click', function () {
 	                infoWindow.open(this.map, marker);
+	                this.tappedMeal = meal;
+	            });
+	        }
+	    }, {
+	        key: 'setDirection',
+	        value: function setDirection(meal) {
+	            var directionsDisplay = new google.maps.DirectionsRenderer({
+	                map: this.map
+	            });
+
+	            var origin = new google.maps.LatLng(this.currentPosition.coords.latitude, this.currentPosition.coords.longitude);
+	            var destination = new google.maps.LatLng(meal.coords.lat, meal.coords.long);
+
+	            // Set destination, origin and travel mode.
+	            var request = {
+	                destination: destination,
+	                origin: origin,
+	                travelMode: google.maps.TravelMode.WALKING
+	            };
+
+	            // Pass the directions request to the directions service.
+	            var directionsService = new google.maps.DirectionsService();
+	            directionsService.route(request, function (response, status) {
+	                if (status == google.maps.DirectionsStatus.OK) {
+	                    // Display the route on the map.
+	                    directionsDisplay.setDirections(response);
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'showMealDetails',
+	        value: function showMealDetails(meal) {
+	            this.nav.push(_mealDetails.MealDetailsPage, {
+	                meal: meal || this.tappedMeal
 	            });
 	        }
 	    }]);
@@ -62332,6 +62378,8 @@
 	var _ionic = __webpack_require__(5);
 
 	var _cookDetails = __webpack_require__(361);
+
+	var _mealMap = __webpack_require__(359);
 
 	var _mealService = __webpack_require__(591);
 
@@ -62423,7 +62471,11 @@
 	        value: function showIngredients(event) {}
 	    }, {
 	        key: 'showMap',
-	        value: function showMap(event) {}
+	        value: function showMap(event) {
+	            this.nav.push(_mealMap.MealMapPage, {
+	                meal: this.meal
+	            });
+	        }
 	    }]);
 
 	    return MealDetailsPage;
