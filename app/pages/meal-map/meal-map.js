@@ -7,7 +7,7 @@ import {MealService} from '../../services/meal-service';
   templateUrl: 'build/pages/meal-map/meal-map.html',
 })
 export class MealMapPage {
-    
+  
   static get parameters() {
     return [[NavController], [NavParams], [MealService]];
   }
@@ -17,6 +17,7 @@ export class MealMapPage {
     this.mealService = mealService;
     this.selectedMeal = navParams.get('meal');
     this.map = null;
+    this.searchQuery = '';
   }
   
   ngOnInit() {
@@ -43,8 +44,9 @@ export class MealMapPage {
                 let latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
                 let mapOptions = {
                     center: latLng,
-                    zoom: 15,
-                    mapTypeId: google.maps.MapTypeId.ROADMAP
+                    zoom: 14,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP,
+                    disableDefaultUI: true
                 }
                 this.map = new google.maps.Map(document.getElementById("map"), mapOptions);
                 return resolve();
@@ -76,7 +78,7 @@ export class MealMapPage {
         map: this.map,
         animation: google.maps.Animation.DROP,
         position: latLng,
-        icon: 'images/food-icon-map.png'
+        icon: 'images/book-icon-map.png'
     });
     let content = `<p (click)="showMealDetails()">${meal.title}</p><img src="${meal.picture}" height="64" width="64">`;          
     this.addInfoWindow(marker, content, meal);
@@ -118,10 +120,13 @@ export class MealMapPage {
     });
   }
   
-  showMealDetails(meal) {
+  itemTapped(event, meal) {
     this.nav.push(MealDetailsPage, {
         meal: meal || this.tappedMeal
     }); 
+  }
+  
+  getItems(searchBar) {
       
   }
 }

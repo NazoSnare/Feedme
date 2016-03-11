@@ -3222,7 +3222,7 @@
 	        this.initializeApp();
 
 	        // set our app's pages
-	        this.pages = [{ title: 'Welcome', component: _welcome.WelcomePage, icon: "bookmark" }, { title: 'Map', component: _mealMap.MealMapPage, icon: "map" }, { title: 'Meals', component: _mealList.MealListPage, icon: "home" }, { title: 'Cooks', component: _cookList.CookListPage, icon: "people" }, { title: 'Favorites', component: _favoriteList.FavoriteListPage, icon: "star" }];
+	        this.pages = [{ title: 'Welcome', component: _welcome.WelcomePage, icon: "bookmark" }, { title: 'Map', component: _mealMap.MealMapPage, icon: "pin" }, { title: 'Books', component: _mealList.MealListPage, icon: "book" }, { title: 'Favorites', component: _favoriteList.FavoriteListPage, icon: "star" }];
 
 	        //TODO
 	        /*
@@ -62240,6 +62240,7 @@
 	        this.mealService = mealService;
 	        this.selectedMeal = navParams.get('meal');
 	        this.map = null;
+	        this.searchQuery = '';
 	    }
 
 	    _createClass(MealMapPage, [{
@@ -62271,8 +62272,9 @@
 	                    var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 	                    var mapOptions = {
 	                        center: latLng,
-	                        zoom: 15,
-	                        mapTypeId: google.maps.MapTypeId.ROADMAP
+	                        zoom: 14,
+	                        mapTypeId: google.maps.MapTypeId.ROADMAP,
+	                        disableDefaultUI: true
 	                    };
 	                    _this2.map = new google.maps.Map(document.getElementById("map"), mapOptions);
 	                    return resolve();
@@ -62305,7 +62307,7 @@
 	                map: this.map,
 	                animation: google.maps.Animation.DROP,
 	                position: latLng,
-	                icon: 'images/food-icon-map.png'
+	                icon: 'images/book-icon-map.png'
 	            });
 	            var content = '<p (click)="showMealDetails()">' + meal.title + '</p><img src="' + meal.picture + '" height="64" width="64">';
 	            this.addInfoWindow(marker, content, meal);
@@ -62349,12 +62351,15 @@
 	            });
 	        }
 	    }, {
-	        key: 'showMealDetails',
-	        value: function showMealDetails(meal) {
+	        key: 'itemTapped',
+	        value: function itemTapped(event, meal) {
 	            this.nav.push(_mealDetails.MealDetailsPage, {
 	                meal: meal || this.tappedMeal
 	            });
 	        }
+	    }, {
+	        key: 'getItems',
+	        value: function getItems(searchBar) {}
 	    }]);
 
 	    return MealMapPage;

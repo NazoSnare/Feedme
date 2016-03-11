@@ -29,9 +29,8 @@ class MyApp {
         // set our app's pages
         this.pages = [
             {title: 'Welcome', component: WelcomePage, icon: "bookmark"},
-            {title: 'Map', component: MealMapPage, icon: "map"},
-            {title: 'Meals', component: MealListPage, icon: "home"},
-            {title: 'Cooks', component: CookListPage, icon: "people"},
+            {title: 'Map', component: MealMapPage, icon: "pin"},
+            {title: 'Books', component: MealListPage, icon: "book"},
             {title: 'Favorites', component: FavoriteListPage, icon: "star"}
         ];
         
