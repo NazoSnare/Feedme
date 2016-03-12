@@ -12,13 +12,15 @@
   </ion-buttons>
 </ion-navbar>
  
-<ion-searchbar [(ngModel)]="searchQuery" (input)="getItems($event)" [debounce]="500"></ion-searchbar>
-
 <ion-content>
+  <ion-searchbar [(ngModel)]="searchQuery" (input)="getItems($event)" [debounce]="500"></ion-searchbar>
   <div id="map"></div>
 </ion-content>
 
 <ion-content>
+    <ion-refresher (refresh)="doRefresh($event)">
+        <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
     <ion-list>
         <button ion-item *ngFor="#meal of meals" (click)="itemTapped($event, meal)">
             <ion-thumbnail item-left>

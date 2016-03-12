@@ -4,6 +4,7 @@ import {WelcomePage} from './pages/welcome/welcome';
 import {MealMapPage} from './pages/meal-map/meal-map';
 import {MealListPage} from './pages/meal-list/meal-list';
 import {CookListPage} from './pages/cook-list/cook-list';
+import {SubmitPage} from './pages/submit/submit';
 import {FavoriteListPage} from './pages/favorite-list/favorite-list';
 import {MealService} from './services/meal-service';
 import {CookService} from './services/cook-service';
@@ -31,7 +32,8 @@ class MyApp {
             {title: 'Welcome', component: WelcomePage, icon: "bookmark"},
             {title: 'Map', component: MealMapPage, icon: "pin"},
             {title: 'Books', component: MealListPage, icon: "book"},
-            {title: 'Favorites', component: FavoriteListPage, icon: "star"}
+            {title: 'Favorites', component: FavoriteListPage, icon: "star"},
+            {title: 'Submit a book', component: SubmitPage, icon: "arrow-dropup-circle"}
         ];
         
         //TODO

@@ -2,6 +2,7 @@ import {OnInit} from 'angular2/core';
 import {Page, NavController, NavParams} from 'ionic-framework/ionic';
 import {MealDetailsPage} from '../meal-details/meal-details';
 import {MealService} from '../../services/meal-service';
+import mapStyle from './map-style';
  
 @Page({
   templateUrl: 'build/pages/meal-map/meal-map.html',
@@ -49,6 +50,7 @@ export class MealMapPage {
                     disableDefaultUI: true
                 }
                 this.map = new google.maps.Map(document.getElementById("map"), mapOptions);
+                this.map.set('styles', mapStyle);
                 return resolve();
             },
             (error) => {
@@ -129,4 +131,11 @@ export class MealMapPage {
   getItems(searchBar) {
       
   }
+  
+  doRefresh(refresher) {
+        this.mealService.findAll().subscribe((data) => {
+            this.meals = data;
+            refresher.complete();
+        });
+    }
 }

@@ -1,0 +1,26 @@
+<ion-navbar *navbar>
+    <button menuToggle>
+        <ion-icon name="menu"></ion-icon>
+    </button>
+  <ion-title>
+    Submit a book
+  </ion-title>
+</ion-navbar>
+
+<ion-content>
+    
+    <div *ngIf="book == null">
+        <button>
+            <ion-icon name="camera"></ion-icon>
+            Scan ISBN Barcode
+        </button>
+    </div>
+    
+    <div *ngIf="book">
+        {{book}}
+    </div>
+    
+</ion-content>
+
+
+
