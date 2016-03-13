@@ -1,5 +1,7 @@
 import {Page, NavController} from 'ionic-framework/ionic';
 import {MealService} from '../../services/meal-service';
+import {GooglebooksService} from '../../services/googlebooks-service';
+import {BarcodeScanner} from 'ionic-native';
 
 @Page({
     templateUrl: 'build/pages/submit/submit.html'
@@ -7,13 +9,14 @@ import {MealService} from '../../services/meal-service';
 export class SubmitPage {
 
     static get parameters() {
-        return [[NavController], [MealService]];
+        return [[NavController], [MealService], [GooglebooksService]];
     }
 
-    constructor(nav, mealService) {
+    constructor(nav, mealService, googlebooksService) {
         this.nav = nav;
         this.mealService = mealService;
-        this.book = null;
+        this.googlebooksService = googlebooksService;
+        this.book = {};
     }
     
     scanBarcode() {
@@ -27,40 +30,35 @@ export class SubmitPage {
         });
     }
     
-    getBookInfo(isbn) {
+    getBookInfo() {
         //TODO Activate loading animation
-        mealService.getBookInfo().subscribe(
+        this.googlebooksService.getBookInfoFromISBN(this.book.isbn).subscribe(
             data => {
-                this.book = data
-                //TODO Remove loading animation
-            }
-        ).catch(
-            err => {
-                console.log('ERROR WHEN GETTING BOOK INFO', err);
+                if (data) {
+                    this.book = {
+                        isbn: this.book.isbn,
+                        title: data.volumeInfo.title,
+                        authors: data.volumeInfo.authors,
+                        publisher: data.volumeInfo.publisher,
+                        publishedDate: data.volumeInfo.publishedDate,
+                        description: data.volumeInfo.description,
+                        categories: data.volumeInfo.categories,
+                        pageCount: data.volumeInfo.pageCount,
+                        smallDescription: data.searchInfo.textSnippet,
+                        averageRating: data.volumeInfo.averageRating,
+                        language: data.volumeInfo.language,
+                        thumbnail: data.volumeInfo.imageLinks.thumbnail,
+                        country: data.saleInfo.country
+                    }
+                }
+                else {
+                    this.error = 'Book not found';
+                    console.log('BOOK NOT FOUND');
+                    setTimeout(() => {this.error = null}, 3000);
+                }
                 //TODO Remove loading animation
             }
         );
-        
-        //google books api
-        //https://www.googleapis.com/books/v1/volumes?q=isbn:9781443411080
-        //book = data.items[0]
-        //owner = (userId)
-        //rentPrice = (number)
-        //salePrice = (number)
-        //isRented = (boolean)
-        //isSold = (boolean)
-        //isbn = (string)
-        //title = book.volumeInfo.title
-        //authors = book.volumeInfo.authors (array)
-        //publisher = book.publisher
-        //publishedDate = book.publishedDate
-        //description = book.description
-        //smallDescription = book.searchInfo.textSnippet
-        //categories = book.categories (array)
-        //pageCount = book.pageCount
-        //averageRating = book.averageRating (number)
-        //language = book.language
-        //thumnail = book.imageLinks.thumbnail (string)
     }
     
     autoSetBookCoords() {
@@ -75,7 +73,7 @@ export class SubmitPage {
         
     }
     
-    submitBook() {
+    submit() {
         mealService.submitBook(this.book).subscribe(
             data => this.nav.pop()
         ).catch(

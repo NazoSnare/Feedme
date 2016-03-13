@@ -3195,18 +3195,20 @@
 
 	var _submit = __webpack_require__(595);
 
-	var _favoriteList = __webpack_require__(596);
+	var _favoriteList = __webpack_require__(619);
 
 	var _mealService = __webpack_require__(591);
 
 	var _cookService = __webpack_require__(362);
+
+	var _googlebooksService = __webpack_require__(596);
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var MyApp = (_dec = (0, _ionic.App)({
 	    templateUrl: 'build/app.html',
 	    config: {},
-	    providers: [_mealService.MealService, _cookService.CookService]
+	    providers: [_mealService.MealService, _cookService.CookService, _googlebooksService.GooglebooksService]
 	}), _dec(_class = function () {
 	    _createClass(MyApp, null, [{
 	        key: 'parameters',
@@ -71650,6 +71652,10 @@
 
 	var _mealService = __webpack_require__(591);
 
+	var _googlebooksService = __webpack_require__(596);
+
+	var _ionicNative = __webpack_require__(597);
+
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var SubmitPage = exports.SubmitPage = (_dec = (0, _ionic.Page)({
@@ -71658,22 +71664,23 @@
 	    _createClass(SubmitPage, null, [{
 	        key: 'parameters',
 	        get: function get() {
-	            return [[_ionic.NavController], [_mealService.MealService]];
+	            return [[_ionic.NavController], [_mealService.MealService], [_googlebooksService.GooglebooksService]];
 	        }
 	    }]);
 
-	    function SubmitPage(nav, mealService) {
+	    function SubmitPage(nav, mealService, googlebooksService) {
 	        _classCallCheck(this, SubmitPage);
 
 	        this.nav = nav;
 	        this.mealService = mealService;
-	        this.book = null;
+	        this.googlebooksService = googlebooksService;
+	        this.book = {};
 	    }
 
 	    _createClass(SubmitPage, [{
 	        key: 'scanBarcode',
 	        value: function scanBarcode() {
-	            BarcodeScanner.scan().then(function (barcodeData) {
+	            _ionicNative.BarcodeScanner.scan().then(function (barcodeData) {
 	                console.log("We got a barcode\n" + "Result: " + result.text + "\n" + "Format: " + result.format + "\n" + "Cancelled: " + result.cancelled);
 	            }, function (err) {
 	                console.log('ERROR WHEN SCANING BARCODE', err);
@@ -71681,38 +71688,36 @@
 	        }
 	    }, {
 	        key: 'getBookInfo',
-	        value: function getBookInfo(isbn) {
+	        value: function getBookInfo() {
 	            var _this = this;
 
 	            //TODO Activate loading animation
-	            mealService.getBookInfo().subscribe(function (data) {
-	                _this.book = data;
-	                //TODO Remove loading animation
-	            }).catch(function (err) {
-	                console.log('ERROR WHEN GETTING BOOK INFO', err);
+	            this.googlebooksService.getBookInfoFromISBN(this.book.isbn).subscribe(function (data) {
+	                if (data) {
+	                    _this.book = {
+	                        isbn: _this.book.isbn,
+	                        title: data.volumeInfo.title,
+	                        authors: data.volumeInfo.authors,
+	                        publisher: data.volumeInfo.publisher,
+	                        publishedDate: data.volumeInfo.publishedDate,
+	                        description: data.volumeInfo.description,
+	                        categories: data.volumeInfo.categories,
+	                        pageCount: data.volumeInfo.pageCount,
+	                        smallDescription: data.searchInfo.textSnippet,
+	                        averageRating: data.volumeInfo.averageRating,
+	                        language: data.volumeInfo.language,
+	                        thumbnail: data.volumeInfo.imageLinks.thumbnail,
+	                        country: data.saleInfo.country
+	                    };
+	                } else {
+	                    _this.error = 'Book not found';
+	                    console.log('BOOK NOT FOUND');
+	                    setTimeout(function () {
+	                        _this.error = null;
+	                    }, 3000);
+	                }
 	                //TODO Remove loading animation
 	            });
-
-	            //google books api
-	            //https://www.googleapis.com/books/v1/volumes?q=isbn:9781443411080
-	            //book = data.items[0]
-	            //owner = (userId)
-	            //rentPrice = (number)
-	            //salePrice = (number)
-	            //isRented = (boolean)
-	            //isSold = (boolean)
-	            //isbn = (string)
-	            //title = book.volumeInfo.title
-	            //authors = book.volumeInfo.authors (array)
-	            //publisher = book.publisher
-	            //publishedDate = book.publishedDate
-	            //description = book.description
-	            //smallDescription = book.searchInfo.textSnippet
-	            //categories = book.categories (array)
-	            //pageCount = book.pageCount
-	            //averageRating = book.averageRating (number)
-	            //language = book.language
-	            //thumnail = book.imageLinks.thumbnail (string)
 	        }
 	    }, {
 	        key: 'autoSetBookCoords',
@@ -71727,8 +71732,8 @@
 	        key: 'setBookCoords',
 	        value: function setBookCoords() {}
 	    }, {
-	        key: 'submitBook',
-	        value: function submitBook() {
+	        key: 'submit',
+	        value: function submit() {
 	            var _this3 = this;
 
 	            mealService.submitBook(this.book).subscribe(function (data) {
@@ -71745,6 +71750,3126 @@
 
 /***/ },
 /* 596 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.GooglebooksService = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _dec, _class;
+
+	var _core = __webpack_require__(7);
+
+	var _http = __webpack_require__(145);
+
+	var _Observable = __webpack_require__(56);
+
+	__webpack_require__(364);
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var API_URL = 'https://www.googleapis.com/books/v1/volumes?q=isbn:';
+
+	var GooglebooksService = exports.GooglebooksService = (_dec = (0, _core.Injectable)(), _dec(_class = function () {
+	    _createClass(GooglebooksService, null, [{
+	        key: 'parameters',
+	        get: function get() {
+	            return [[_http.Http]];
+	        }
+	    }]);
+
+	    function GooglebooksService(http) {
+	        _classCallCheck(this, GooglebooksService);
+
+	        this.http = http;
+	    }
+
+	    _createClass(GooglebooksService, [{
+	        key: 'getBookInfoFromISBN',
+	        value: function getBookInfoFromISBN(isbn) {
+	            return this.http.get(API_URL + isbn).map(function (res) {
+	                return res.json();
+	            }).map(function (res) {
+	                return res.totalItems ? res.items[0] : null;
+	            }).catch(this.handleError);
+	        }
+	    }, {
+	        key: 'handleError',
+	        value: function handleError(error) {
+	            console.error(error);
+	            return _Observable.Observable.throw(error.json().error || 'Server error');
+	        }
+	    }]);
+
+	    return GooglebooksService;
+	}()) || _class);
+
+/***/ },
+/* 597 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var ng1_1 = __webpack_require__(598);
+	ng1_1.initAngular1();
+	var DEVICE_READY_TIMEOUT = 2000;
+	var actionsheet_1 = __webpack_require__(599);
+	exports.ActionSheet = actionsheet_1.ActionSheet;
+	var apprate_1 = __webpack_require__(602);
+	exports.AppRate = apprate_1.AppRate;
+	var appversion_1 = __webpack_require__(603);
+	exports.AppVersion = appversion_1.AppVersion;
+	var barcodescanner_1 = __webpack_require__(604);
+	exports.BarcodeScanner = barcodescanner_1.BarcodeScanner;
+	var badge_1 = __webpack_require__(605);
+	exports.Badge = badge_1.Badge;
+	var ble_1 = __webpack_require__(606);
+	exports.BLE = ble_1.BLE;
+	var camera_1 = __webpack_require__(607);
+	exports.Camera = camera_1.Camera;
+	var calendar_1 = __webpack_require__(608);
+	exports.Calendar = calendar_1.Calendar;
+	var clipboard_1 = __webpack_require__(609);
+	exports.Clipboard = clipboard_1.Clipboard;
+	var contacts_1 = __webpack_require__(610);
+	exports.Contacts = contacts_1.Contacts;
+	var datepicker_1 = __webpack_require__(611);
+	exports.DatePicker = datepicker_1.DatePicker;
+	var device_1 = __webpack_require__(612);
+	exports.Device = device_1.Device;
+	var facebook_1 = __webpack_require__(613);
+	exports.Facebook = facebook_1.Facebook;
+	var geolocation_1 = __webpack_require__(614);
+	exports.Geolocation = geolocation_1.Geolocation;
+	var push_1 = __webpack_require__(615);
+	exports.Push = push_1.Push;
+	var statusbar_1 = __webpack_require__(616);
+	exports.StatusBar = statusbar_1.StatusBar;
+	var toast_1 = __webpack_require__(617);
+	exports.Toast = toast_1.Toast;
+	var touchid_1 = __webpack_require__(618);
+	exports.TouchID = touchid_1.TouchID;
+	// Window export to use outside of a module loading system
+	window['IonicNative'] = {
+	    ActionSheet: actionsheet_1.ActionSheet,
+	    AppRate: apprate_1.AppRate,
+	    AppVersion: appversion_1.AppVersion,
+	    BarcodeScanner: barcodescanner_1.BarcodeScanner,
+	    Badge: badge_1.Badge,
+	    BLE: ble_1.BLE,
+	    Camera: camera_1.Camera,
+	    Calendar: calendar_1.Calendar,
+	    Clipboard: clipboard_1.Clipboard,
+	    Contacts: contacts_1.Contacts,
+	    DatePicker: datepicker_1.DatePicker,
+	    Device: device_1.Device,
+	    Facebook: facebook_1.Facebook,
+	    Geolocation: geolocation_1.Geolocation,
+	    Push: push_1.Push,
+	    StatusBar: statusbar_1.StatusBar,
+	    Toast: toast_1.Toast,
+	    TouchID: touchid_1.TouchID
+	};
+	// To help developers using cordova, we listen for the device ready event and
+	// log an error if it didn't fire in a reasonable amount of time. Generally,
+	// when this happens, developers should remove and reinstall plugins, since
+	// an inconsistent plugin is often the culprit.
+	var before = +new Date;
+	var didFireReady = false;
+	document.addEventListener('deviceready', function () {
+	    console.log('DEVICE READY FIRED AFTER', (+new Date - before), 'ms');
+	    didFireReady = true;
+	});
+	setTimeout(function () {
+	    if (!didFireReady && window.cordova) {
+	        console.warn('Native: deviceready did not fire within ' + DEVICE_READY_TIMEOUT + 'ms. This can happen when plugins are in an inconsistent state. Try removing plugins from plugins/ and reinstalling them.');
+	    }
+	}, DEVICE_READY_TIMEOUT);
+	//# sourceMappingURL=index.js.map
+
+/***/ },
+/* 598 */
+/***/ function(module, exports) {
+
+	/**
+	 * Initialize the ngCordova Angular module if we're running in ng1
+	 */
+	function initAngular1() {
+	    if (window.angular) {
+	        window.angular.module('ngCordova', []);
+	    }
+	}
+	exports.initAngular1 = initAngular1;
+	/**
+	 * Publish a new Angular 1 service for this plugin.
+	 */
+	function publishAngular1Service(config, cls) {
+	    var serviceName = '$cordova' + cls.name;
+	    console.log('Registering Angular1 service', serviceName);
+	    window.angular.module('ngCordova').service(serviceName, [function () {
+	            var funcs = {};
+	            for (var k in cls) {
+	            }
+	            return funcs;
+	        }]);
+	}
+	exports.publishAngular1Service = publishAngular1Service;
+	//# sourceMappingURL=ng1.js.map
+
+/***/ },
+/* 599 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	var plugin_1 = __webpack_require__(600);
+	/**
+	 * @name ActionSheet
+	 * @description
+	 * The ActionSheet plugin shows a native list of options the user can choose from.
+	 *
+	 * Requires Cordova plugin: `cordova-plugin-actionsheet`. For more info, please see the [ActionSheet plugin docs](https://github.com/phonegap/phonegap-plugin-barcodescanner).
+	 *
+	 * @usage
+	 *
+	 * ```ts
+	 * import {ActionSheet} from 'ionic-native';
+	 *
+	 * let buttonLabels = ['Share via Facebook', 'Share via Twitter'];
+	 * ActionSheet.show({
+	 *   'title': 'What do you want with this image?',
+	 *   'buttonLabels': buttonLabels,
+	 *   'addCancelButtonWithLabel': 'Cancel',
+	 *   'addDestructiveButtonWithLabel' : 'Delete'
+	 * }).then(buttonIndex => {
+	 *   console.log('Button pressed: ' + buttonLabels[buttonIndex - 1]);
+	 * });
+	 * ```
+	 *
+	 */
+	var ActionSheet = (function () {
+	    function ActionSheet() {
+	    }
+	    /**
+	     * Show the ActionSheet. The ActionSheet's options is an object with the following propterties.
+	     *
+	     * | Option                        | Type      | Description                                  |
+	     * |-------------------------------|-----------|----------------------------------------------|
+	     * | title                         |`string`   | The title for the actionsheet                |
+	     * | buttonLabels                  |`string[]` | the labels for the buttons. Uses the index x |
+	     * | androidTheme                  |`number`   | Theme to bue used on Android                 |
+	     * | androidEnableCancelButton     |`boolean`  | Enable a cancel on Android                   |
+	     * | winphoneEnableCancelButton    |`boolean`  | Enable a cancel on Android                   |
+	     * | addCancelButtonWithLabel      |`string`   | Add a cancle button with text                |
+	     * | addDestructiveButtonWithLabel |`string`   | Add a destructive button with text           |
+	     * | position                      |`number[]` | On an iPad, set the X,Y position             |
+	     *
+	     * @param {options} Options See table above
+	     * @returns {Promise} Returns a Promise that resolves with the index of the
+	     *   button pressed (1 based, so 1, 2, 3, etc.)
+	     */
+	    ActionSheet.show = function (options) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Hide the ActionSheet.
+	     */
+	    ActionSheet.hide = function () {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], ActionSheet, "show", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], ActionSheet, "hide", null);
+	    ActionSheet = __decorate([
+	        plugin_1.Plugin({
+	            plugin: 'cordova-plugin-actionsheet',
+	            pluginRef: 'plugins.actionsheet',
+	            repo: 'https://github.com/EddyVerbruggen/cordova-plugin-actionsheet'
+	        })
+	    ], ActionSheet);
+	    return ActionSheet;
+	})();
+	exports.ActionSheet = ActionSheet;
+	//# sourceMappingURL=actionsheet.js.map
+
+/***/ },
+/* 600 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var util_1 = __webpack_require__(601);
+	var Observable_1 = __webpack_require__(56);
+	exports.getPlugin = function (pluginRef) {
+	    return util_1.get(window, pluginRef);
+	};
+	exports.isInstalled = function (pluginRef) {
+	    return !!exports.getPlugin(pluginRef);
+	};
+	exports.pluginWarn = function (pluginObj, method) {
+	    var pluginName = pluginObj.name;
+	    var plugin = pluginObj.plugin;
+	    if (method) {
+	        console.warn('Native: tried calling ' + pluginName + '.' + method + ', but the ' + pluginName + ' plugin is not installed.');
+	    }
+	    else {
+	        console.warn('Native: tried accessing the ' + pluginName + ' plugin but it\'s not installed.');
+	    }
+	    console.warn('Install the ' + pluginName + ' plugin: \'cordova plugin add ' + plugin + '\'');
+	};
+	exports.cordovaWarn = function (pluginName, method) {
+	    if (method) {
+	        console.warn('Native: tried calling ' + pluginName + '.' + method + ', but Cordova is not available. Make sure to include cordova.js or run in a device/simulator');
+	    }
+	    else {
+	        console.warn('Native: tried accessing the ' + pluginName + ' plugin but Cordova is not available. Make sure to include cordova.js or run in a device/simulator');
+	    }
+	};
+	function callCordovaPlugin(pluginObj, methodName, args, opts, resolve, reject) {
+	    // Try to figure out where the success/error callbacks need to be bound
+	    // to our promise resolve/reject handlers.
+	    if (opts === void 0) { opts = {}; }
+	    // If the plugin method expects myMethod(success, err, options)
+	    if (opts.callbackOrder == 'reverse') {
+	        // Get those arguments in the order [resolve, reject, ...restOfArgs]
+	        args.unshift(reject);
+	        args.unshift(resolve);
+	    }
+	    else if (typeof opts.successIndex !== 'undefined' || typeof opts.errorIndex !== 'undefined') {
+	        // If we've specified a success/error index
+	        args.splice(opts.successIndex, 0, resolve);
+	        args.splice(opts.errorIndex, 0, reject);
+	    }
+	    else {
+	        // Otherwise, let's tack them on to the end of the argument list
+	        // which is 90% of cases
+	        args.push(resolve);
+	        args.push(reject);
+	    }
+	    var pluginInstance = exports.getPlugin(pluginObj.pluginRef);
+	    if (!pluginInstance) {
+	        // Do this check in here in the case that the Web API for this plugin is available (for example, Geolocation).
+	        if (!window.cordova) {
+	            exports.cordovaWarn(pluginObj.name, methodName);
+	            reject && reject({
+	                error: 'cordova_not_available'
+	            });
+	            return;
+	        }
+	        exports.pluginWarn(pluginObj, methodName);
+	        reject && reject({
+	            error: 'plugin_not_installed'
+	        });
+	        return;
+	    }
+	    // console.log('Cordova calling', pluginObj.name, methodName, args);
+	    // TODO: Illegal invocation needs window context
+	    return util_1.get(window, pluginObj.pluginRef)[methodName].apply(pluginInstance, args);
+	}
+	function getPromise(cb) {
+	    if (window.Promise) {
+	        // console.log('Native promises available...');
+	        return new Promise(function (resolve, reject) {
+	            cb(resolve, reject);
+	        });
+	    }
+	    else if (window.angular) {
+	        var $q_1 = window.angular.injector(['ng']).get('$q');
+	        // console.log('Loaded $q', $q);
+	        return $q_1(function (resolve, reject) {
+	            cb(resolve, reject);
+	        });
+	    }
+	    else {
+	        console.error('No Promise support or polyfill found. To enable Ionic Native support, please add the es6-promise polyfill before this script, or run with a library like Angular 1/2 or on a recent browser.');
+	    }
+	}
+	function wrapPromise(pluginObj, methodName, args, opts) {
+	    if (opts === void 0) { opts = {}; }
+	    return getPromise(function (resolve, reject) {
+	        callCordovaPlugin(pluginObj, methodName, args, opts, resolve, reject);
+	    });
+	}
+	function wrapObservable(pluginObj, methodName, args, opts) {
+	    if (opts === void 0) { opts = {}; }
+	    return new Observable_1.Observable(function (observer) {
+	        var pluginResult = callCordovaPlugin(pluginObj, methodName, args, opts, observer.next.bind(observer), observer.error.bind(observer));
+	        return function () {
+	            try {
+	                if (opts.clearWithArgs) {
+	                    return util_1.get(window, pluginObj.pluginRef)[opts.clearFunction].apply(pluginObj, args);
+	                }
+	                return util_1.get(window, pluginObj.pluginRef)[opts.clearFunction].call(pluginObj, pluginResult);
+	            }
+	            catch (e) {
+	                console.warn('Unable to clear the previous observable watch for', pluginObj.name, methodName);
+	                console.error(e);
+	            }
+	        };
+	    });
+	}
+	exports.wrap = function (pluginObj, methodName, opts) {
+	    if (opts === void 0) { opts = {}; }
+	    return function () {
+	        var args = [];
+	        for (var _i = 0; _i < arguments.length; _i++) {
+	            args[_i - 0] = arguments[_i];
+	        }
+	        if (opts.sync) {
+	            return callCordovaPlugin(pluginObj, methodName, args, opts);
+	        }
+	        else if (opts.observable) {
+	            return wrapObservable(pluginObj, methodName, args, opts);
+	        }
+	        else {
+	            return wrapPromise(pluginObj, methodName, args, opts);
+	        }
+	    };
+	};
+	/**
+	 * Class decorator specifying Plugin metadata. Required for all plugins.
+	 */
+	function Plugin(config) {
+	    return function (cls) {
+	        // Add these fields to the class
+	        for (var k in config) {
+	            cls[k] = config[k];
+	        }
+	        cls['installed'] = function () {
+	            return !!exports.getPlugin(config.pluginRef);
+	        };
+	        return cls;
+	    };
+	}
+	exports.Plugin = Plugin;
+	/**
+	 * Wrap a stub function in a call to a Cordova plugin, checking if both Cordova
+	 * and the required plugin are installed.
+	 */
+	function Cordova(opts) {
+	    if (opts === void 0) { opts = {}; }
+	    return function (target, methodName, descriptor) {
+	        var originalMethod = descriptor.value;
+	        return {
+	            value: function () {
+	                var args = [];
+	                for (var _i = 0; _i < arguments.length; _i++) {
+	                    args[_i - 0] = arguments[_i];
+	                }
+	                return exports.wrap(this, methodName, opts).apply(this, args);
+	            }
+	        };
+	    };
+	}
+	exports.Cordova = Cordova;
+	/**
+	 * Before calling the original method, ensure Cordova and the plugin are installed.
+	 */
+	function CordovaProperty(target, key, descriptor) {
+	    var originalMethod = descriptor.get;
+	    descriptor.get = function () {
+	        var args = [];
+	        for (var _i = 0; _i < arguments.length; _i++) {
+	            args[_i - 0] = arguments[_i];
+	        }
+	        // console.log('Calling', this);
+	        if (!window.cordova) {
+	            exports.cordovaWarn(this.name, null);
+	            return {};
+	        }
+	        var pluginInstance = exports.getPlugin(this.pluginRef);
+	        if (!pluginInstance) {
+	            exports.pluginWarn(this, key);
+	            return {};
+	        }
+	        return originalMethod.apply(this, args);
+	    };
+	    return descriptor;
+	}
+	exports.CordovaProperty = CordovaProperty;
+	//# sourceMappingURL=plugin.js.map
+
+/***/ },
+/* 601 */
+/***/ function(module, exports) {
+
+	function get(obj, path) {
+	    for (var i = 0, path = path.split('.'), len = path.length; i < len; i++) {
+	        if (!obj) {
+	            return null;
+	        }
+	        obj = obj[path[i]];
+	    }
+	    return obj;
+	}
+	exports.get = get;
+	;
+	//# sourceMappingURL=util.js.map
+
+/***/ },
+/* 602 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	var plugin_1 = __webpack_require__(600);
+	/**
+	 * The AppRate plugin makes it easy to prompt the user to rate your app, either now, later, or never.
+	 *
+	 * Requires Cordova plugin: cordova-plugin-apprate. For more info, please see the [AppRate plugin docs](https://github.com/pushandplay/cordova-plugin-apprate).
+	 *
+	 * ```
+	 * cordova plugin add https://github.com/pushandplay/cordova-plugin-apprate.git
+	 * ````
+	 *
+	 * @usage
+	 * ```js
+	 * AppRate.preferences.storeAppURL.ios = '<my_app_id>';
+	 * AppRate.preferences.storeAppURL.android = 'market://details?id=<package_name>';
+	 * AppRate.preferences.storeAppURL.blackberry = 'appworld://content/[App Id]/';
+	 * AppRate.preferences.storeAppURL.windows8 = 'ms-windows-store:Review?name=<the Package Family Name of the application>';
+	 * AppRate.promptForRating();
+	 * ```
+	 */
+	var AppRate = (function () {
+	    function AppRate() {
+	    }
+	    Object.defineProperty(AppRate, "preferences", {
+	        /**
+	         * Rating dialog preferences
+	         *
+	         * useLanguage {String} null - custom BCP 47 language tag
+	         * displayAppName {String} '' - custom application title
+	         * promptAgainForEachNewVersion {Boolean} true - show dialog again when application version will be updated
+	         * usesUntilPrompt {Integer} 3 - count of runs of application before dialog will be displayed
+	         * openStoreInApp {Boolean} false - leave app or no when application page opened in app store (now supported only for iOS)
+	         * useCustomRateDialog {Boolean} false - use custom view for rate dialog
+	         * callbacks.onButtonClicked {Function} null - call back function. called when user clicked on rate-dialog buttons
+	         * callbacks.onRateDialogShow {Function} null - call back function. called when rate-dialog showing
+	         * storeAppURL.ios {String} null - application id in AppStore
+	         * storeAppURL.android {String} null - application URL in GooglePlay
+	         * storeAppURL.blackberry {String} null - application URL in AppWorld
+	         * storeAppURL.windows8 {String} null - application URL in WindowsStore
+	         * customLocale {Object} null - custom locale object
+	         * @type {{}}
+	         */
+	        get: function () {
+	            return window.AppRate.preferences;
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    /**
+	     * Prompts the user for rating
+	     *
+	     * @param {boolean} immediately  Show the rating prompt immediately.
+	     */
+	    AppRate.promptForRating = function (immediately) { };
+	    ;
+	    __decorate([
+	        plugin_1.CordovaProperty
+	    ], AppRate, "preferences", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], AppRate, "promptForRating", null);
+	    AppRate = __decorate([
+	        plugin_1.Plugin({
+	            plugin: 'https://github.com/pushandplay/cordova-plugin-apprate.git',
+	            pluginRef: 'AppRate'
+	        })
+	    ], AppRate);
+	    return AppRate;
+	})();
+	exports.AppRate = AppRate;
+	//# sourceMappingURL=apprate.js.map
+
+/***/ },
+/* 603 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	var plugin_1 = __webpack_require__(600);
+	/**
+	 * Reads the version of your app from the target build settings.
+	 *
+	 * Requires Cordova plugin: `cordova-plugin-app-version`. For more info, please see the [Cordova App Version docs](ttps://github.com/whiteoctober/cordova-plugin-app-version).
+	 *
+	 * ```
+	 * cordova plugin add cordova-plugin-app-version
+	 * ````
+	 *
+	 * @usage
+	 * ```js
+	 *  AppVersion.getAppName();
+	 *  AppVersion.getPackageName();
+	 *  AppVersion.getVersionCode();
+	 *  AppVersion.getVersionNumber();
+	 * ```
+	 */
+	var AppVersion = (function () {
+	    function AppVersion() {
+	    }
+	    /**
+	     * Returns the name of the app
+	     * @returns {Promise}
+	     */
+	    AppVersion.getAppName = function () {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Returns the package name of the app
+	     * @returns {Promise}
+	     */
+	    AppVersion.getPackageName = function () {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Returns the build identifier of the app
+	     * @returns {Promise}
+	     */
+	    AppVersion.getVersionCode = function () {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Returns the version of the app
+	     * @returns {Promise}
+	     */
+	    AppVersion.getVersionNumber = function () {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], AppVersion, "getAppName", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], AppVersion, "getPackageName", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], AppVersion, "getVersionCode", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], AppVersion, "getVersionNumber", null);
+	    AppVersion = __decorate([
+	        plugin_1.Plugin({
+	            plugin: 'cordova-plugin-app-version',
+	            pluginRef: 'cordova.getAppVersion'
+	        })
+	    ], AppVersion);
+	    return AppVersion;
+	})();
+	exports.AppVersion = AppVersion;
+	//# sourceMappingURL=appversion.js.map
+
+/***/ },
+/* 604 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	var plugin_1 = __webpack_require__(600);
+	/**
+	 * @name BarcodeScanner
+	 * @description
+	 * The Barcode Scanner Plugin opens a camera view and automatically scans a barcode, returning the data back to you.
+	 *
+	 * Requires Cordova plugin: `phonegap-plugin-barcodescanner`. For more info, please see the [BarcodeScanner plugin docs](https://github.com/phonegap/phonegap-plugin-barcodescanner).
+	 *
+	 * @usage
+	 * ```js
+	 * BarcodeScanner.scan().then((barcodeData) => {
+	 *  // Success! Barcode data is here
+	 * }, (err) => {
+	 * 	// An error occurred
+	 * });
+	 * ```
+	 */
+	var BarcodeScanner = (function () {
+	    function BarcodeScanner() {
+	    }
+	    /**
+	     * Open the barcode scanner.
+	     * @return Returns a Promise that resolves with scanner data, or rejects with an error.
+	     */
+	    BarcodeScanner.scan = function () {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    ;
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], BarcodeScanner, "scan", null);
+	    BarcodeScanner = __decorate([
+	        plugin_1.Plugin({
+	            plugin: 'phonegap-plugin-barcodescanner',
+	            pluginRef: 'cordova.plugins.barcodeScanner',
+	            repo: 'https://github.com/phonegap/phonegap-plugin-barcodescanner'
+	        })
+	    ], BarcodeScanner);
+	    return BarcodeScanner;
+	})();
+	exports.BarcodeScanner = BarcodeScanner;
+	//# sourceMappingURL=barcodescanner.js.map
+
+/***/ },
+/* 605 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	var plugin_1 = __webpack_require__(600);
+	/**
+	 * The essential purpose of badge numbers is to enable an application to inform its users that it has something for them — for example, unread messages — when the application isn’t running in the foreground.
+	 *
+	 * Requires Cordova plugin: cordova-plugin-badge. For more info, please see the [Badge plugin docs](https://github.com/katzer/cordova-plugin-badge).
+	 *
+	 * ```
+	 * cordova plugin add cordova-plugin-badge
+	 * ```
+	 *
+	 * @usage
+	 * ```js
+	 * Badge.set(10);
+	 * Badge.increase();
+	 * Badge.clear();
+	 * ```
+	 */
+	var Badge = (function () {
+	    function Badge() {
+	    }
+	    /**
+	     * Clear the badge of the app icon.
+	     */
+	    Badge.clear = function () {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Set the badge of the app icon.
+	     * @param {number} number  The new badge number.
+	     * @returns {Promise}
+	     */
+	    Badge.set = function (number) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Get the badge of the app icon.
+	     * @returns {Promise}
+	     */
+	    Badge.get = function () {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Increase the badge number.
+	     * @param {number} count  Count to add to the current badge number
+	     * @returns {Promise}
+	     */
+	    Badge.increase = function (number) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Decrease the badge number.
+	     * @param {number} count  Count to subtract from the current badge number
+	     * @returns {Promise}
+	     */
+	    Badge.decrease = function (number) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Determine if the app has permission to show badges.
+	     */
+	    Badge.hasPermission = function () {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Register permission to set badge notifications
+	     * @returns {Promise}
+	     */
+	    Badge.registerPermission = function () {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Badge, "clear", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Badge, "set", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Badge, "get", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Badge, "increase", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Badge, "decrease", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Badge, "hasPermission", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Badge, "registerPermission", null);
+	    Badge = __decorate([
+	        plugin_1.Plugin({
+	            plugin: 'cordova-plugin-badge',
+	            pluginRef: 'cordova.plugins.notification.badge'
+	        })
+	    ], Badge);
+	    return Badge;
+	})();
+	exports.Badge = Badge;
+	//# sourceMappingURL=badge.js.map
+
+/***/ },
+/* 606 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	var plugin_1 = __webpack_require__(600);
+	var Observable_1 = __webpack_require__(56);
+	/**
+	 * @name BLE
+	 * @description
+	 * This plugin enables communication between a phone and Bluetooth Low Energy (BLE) peripherals.
+	 *
+	 * The plugin provides a simple JavaScript API for iOS and Android.
+	 *
+	 * - Scan for peripherals
+	 * - Connect to a peripheral
+	 * - Read the value of a characteristic
+	 * - Write new value to a characteristic
+	 * - Get notified when characteristic's value changes
+	 *
+	 * Advertising information is returned when scanning for peripherals. Service, characteristic, and property info is returned when connecting to a peripheral. All access is via service and characteristic UUIDs. The plugin manages handles internally.
+	 *
+	 * Simultaneous connections to multiple peripherals are supported.
+	 *
+	 * @usage
+	 *
+	 * ## Peripheral Data
+	 *
+	 * Peripheral Data is passed to the success callback when scanning and connecting. Limited data is passed when scanning.
+	 *
+	 * ```ts
+	 *   {
+	 *       "name": "Battery Demo",
+	 *       "id": "20:FF:D0:FF:D1:C0",
+	 *       "advertising": [2,1,6,3,3,15,24,8,9,66,97,116,116,101,114,121],
+	 *       "rssi": -55
+	 *   }
+	 * ```
+	 * After connecting, the peripheral object also includes service, characteristic and descriptor information.
+	 *
+	 * ```ts
+	 *   {
+	 *       "name": "Battery Demo",
+	 *       "id": "20:FF:D0:FF:D1:C0",
+	 *       "advertising": [2,1,6,3,3,15,24,8,9,66,97,116,116,101,114,121],
+	 *       "rssi": -55,
+	 *       "services": [
+	 *           "1800",
+	 *           "1801",
+	 *           "180f"
+	 *       ],
+	 *       "characteristics": [
+	 *           {
+	 *               "service": "1800",
+	 *               "characteristic": "2a00",
+	 *               "properties": [
+	 *                   "Read"
+	 *               ]
+	 *           },
+	 *           {
+	 *               "service": "1800",
+	 *               "characteristic": "2a01",
+	 *               "properties": [
+	 *                   "Read"
+	 *               ]
+	 *           },
+	 *           {
+	 *               "service": "1801",
+	 *               "characteristic": "2a05",
+	 *               "properties": [
+	 *                   "Read"
+	 *               ]
+	 *           },
+	 *           {
+	 *               "service": "180f",
+	 *               "characteristic": "2a19",
+	 *               "properties": [
+	 *                   "Read"
+	 *               ],
+	 *               "descriptors": [
+	 *                   {
+	 *                       "uuid": "2901"
+	 *                   },
+	 *                   {
+	 *                       "uuid": "2904"
+	 *                   }
+	 *               ]
+	 *           }
+	 *       ]
+	 *   }
+	 * ```
+	 *
+	 * ## Advertising Data
+	 * Bluetooth advertising data is returned in when scanning for devices. The format format varies depending on your platform. On Android advertising data will be the raw advertising bytes. iOS does not allow access to raw advertising data, so a dictionary of data is returned.
+	 *
+	 * The advertising information for both Android and iOS appears to be a combination of advertising data and scan response data.
+	 *
+	 * ### Android
+	 *
+	 * ```ts
+	 *   {
+	 *       "name": "demo",
+	 *       "id": "00:1A:7D:DA:71:13",
+	 *       "advertising": ArrayBuffer,
+	 *      "rssi": -37
+	 *  }
+	 * ```
+	 *
+	 * Convert the advertising info to a Uint8Array for processing. `var adData = new Uint8Array(peripheral.advertising)`
+	 *
+	 * ### iOS
+	 *
+	 * Note that iOS uses the string value of the constants for the [Advertisement Data Retrieval Keys](https://developer.apple.com/library/ios/documentation/CoreBluetooth/Reference/CBCentralManagerDelegate_Protocol/index.html#//apple_ref/doc/constant_group/Advertisement_Data_Retrieval_Keys). This will likely change in the future.
+	 *
+	 * ```ts
+	 *   {
+	 *       "name": "demo",
+	 *       "id": "D8479A4F-7517-BCD3-91B5-3302B2F81802",
+	 *       "advertising": {
+	 *           "kCBAdvDataChannel": 37,
+	 *           "kCBAdvDataServiceData": {
+	 *               "FED8": {
+	 *                   "byteLength": 7 // data not shown
+	 *               }
+	 *           },
+	 *           "kCBAdvDataLocalName": "demo",
+	 *           "kCBAdvDataServiceUUIDs": ["FED8"],
+	 *           "kCBAdvDataManufacturerData": {
+	 *               "byteLength": 7  // data not shown
+	 *           },
+	 *           "kCBAdvDataTxPowerLevel": 32,
+	 *           "kCBAdvDataIsConnectable": true
+	 *       },
+	 *       "rssi": -53
+	 *   }
+	 * ```
+	 *
+	 * ## Typed Arrays
+	 *
+	 * This plugin uses typed Arrays or ArrayBuffers for sending and receiving data.
+	 *
+	 * This means that you need convert your data to ArrayBuffers before sending and from ArrayBuffers when receiving.
+	 *
+	 * ```ts
+	 *   // ASCII only
+	 *   function stringToBytes(string) {
+	 *      var array = new Uint8Array(string.length);
+	 *      for (var i = 0, l = string.length; i < l; i++) {
+	 *          array[i] = string.charCodeAt(i);
+	 *       }
+	 *       return array.buffer;
+	 *   }
+	 *
+	 *   // ASCII only
+	 *   function bytesToString(buffer) {
+	 *       return String.fromCharCode.apply(null, new Uint8Array(buffer));
+	 *   }
+	 * ```
+	 * You can read more about typed arrays in these articles on [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays) and [HTML5 Rocks](http://www.html5rocks.com/en/tutorials/webgl/typed_arrays/).
+	 *
+	 * ## UUIDs
+	 *
+	 * UUIDs are always strings and not numbers. Some 16-bit UUIDs, such as '2220' look like integers, but they're not. (The integer 2220 is 0x8AC in hex.) This isn't a problem with 128 bit UUIDs since they look like strings 82b9e6e1-593a-456f-be9b-9215160ebcac. All 16-bit UUIDs should also be passed to methods as strings.
+	 *
+	 */
+	var BLE = (function () {
+	    function BLE() {
+	    }
+	    /**
+	     * Scan and discover BLE peripherals for the specified amount of time.
+	     *
+	     * @usage
+	     * ```
+	     * BLE.scan([], 5).subscribe(device => {
+	     *   console.log(JSON.stringify(device));
+	     * });
+	     * ```
+	     * @param {string[]} services  List of service UUIDs to discover, or `[]` to find all devices
+	     * @param {number} seconds  Number of seconds to run discovery
+	     * @return Returns an Observable that notifies of each peripheral that is discovered during the specified time.
+	     */
+	    BLE.scan = function (services, seconds) {
+	        // This Observable is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Observable, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Observable_1.Observable(function (observer) { });
+	    };
+	    /**
+	     * Scan and discover BLE peripherals until `stopScan` is called.
+	     *
+	     * @usage
+	     * ```
+	     * BLE.startScan([]).subscribe(device => {
+	     *   console.log(JSON.stringify(device));
+	     * });
+	     *
+	     * setTimeout(() => {
+	     *   BLE.stopScan();
+	     * }, 5000);
+	     * ```
+	     * @param {string[]} services  List of service UUIDs to discover, or `[]` to find all devices
+	     * @return Returns an Observable that notifies of each peripheral discovered.
+	     */
+	    BLE.startScan = function (services) {
+	        // This Observable is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Observable, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Observable_1.Observable(function (observer) { });
+	    };
+	    ;
+	    /**
+	     * Stop a scan started by `startScan`.
+	     *
+	     * @usage
+	     * ```
+	     * BLE.startScan([]).subscribe(device => {
+	     *   console.log(JSON.stringify(device));
+	     * });
+	     * setTimeout(() => {
+	     *   BLE.stopScan().then(() => { console.log('scan stopped'); });
+	     * }, 5000);
+	     * ```
+	     * @return returns a Promise.
+	     */
+	    BLE.stopScan = function () {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    ;
+	    /**
+	     * Connect to a peripheral.
+	     * @usage
+	     * ```
+	     *   BLE.connect('12:34:56:78:9A:BC').subscribe(peripheralData => {
+	     *     console.log(peripheralData);
+	     *   },
+	     *   peripheralData => {
+	     *     console.log('disconnected');
+	     *   });
+	     * ```
+	     * @param deviceId {string}  UUID or MAC address of the peripheral
+	     * @return Returns an Observable that notifies of connect/disconnect.
+	     */
+	    BLE.connect = function (deviceId) {
+	        // This Observable is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Observable, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Observable_1.Observable(function (observer) { });
+	    };
+	    ;
+	    /**
+	     * Disconnect from a peripheral.
+	     * @usage
+	     * ```
+	     *   BLE.disconnect('12:34:56:78:9A:BC').then(() => {
+	     *     console.log('Disconnected');
+	     *   });
+	     * ```
+	     * @param deviceId {string}  UUID or MAC address of the peripheral
+	     * @return Returns a Promise
+	     */
+	    BLE.disconnect = function (deviceId) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    ;
+	    /**
+	     * Read the value of a characteristic.
+	     *
+	     * @param {string} device_id  UUID or MAC address of the peripheral
+	     * @param {string} service_uuid  UUID of the BLE service
+	     * @param {string} characteristic_uuid  UUID of the BLE characteristic
+	     * @return Returns a Promise
+	     */
+	    BLE.read = function (deviceId, serviceUUID, characteristicUUID) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    ;
+	    /**
+	     * Write the value of a characteristic.
+	     * @usage
+	     * ```
+	     * // send 1 byte to switch a light on
+	     * var data = new Uint8Array(1);
+	     * data[0] = 1;
+	     * BLE.write(device_id, "FF10", "FF11", data.buffer);
+	     *
+	     * // send a 3 byte value with RGB color
+	     * var data = new Uint8Array(3);
+	     * data[0] = 0xFF;  // red
+	     * data[0] = 0x00; // green
+	     * data[0] = 0xFF; // blue
+	     * BLE.write(device_id, "ccc0", "ccc1", data.buffer);
+	     *
+	     * // send a 32 bit integer
+	     * var data = new Uint32Array(1);
+	     * data[0] = counterInput.value;
+	     * BLE.write(device_id, SERVICE, CHARACTERISTIC, data.buffer);
+	     *
+	     * ```
+	     * @param {string} device_id  UUID or MAC address of the peripheral
+	     * @param {string} service_uuid  UUID of the BLE service
+	     * @param {string} characteristic_uuid  UUID of the BLE characteristic
+	     * @param {ArrayBuffer} value  Data to write to the characteristic, as an ArrayBuffer.
+	     * @return Returns a Promise
+	     */
+	    BLE.write = function (deviceId, serviceUUID, characteristicUUID, value) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    ;
+	    /**
+	     * Write the value of a characteristic without waiting for confirmation from the peripheral.
+	     *
+	     * @param {string} device_id  UUID or MAC address of the peripheral
+	     * @param {string} service_uuid  UUID of the BLE service
+	     * @param {string} characteristic_uuid  UUID of the BLE characteristic
+	     * @param {ArrayBuffer} value  Data to write to the characteristic, as an ArrayBuffer.
+	     * @return Returns a Promise
+	     */
+	    BLE.writeWithoutResponse = function (deviceId, serviceUUID, characteristicUUID, value) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    ;
+	    /**
+	     * Register to be notified when the value of a characteristic changes.
+	     *
+	     * @usage
+	     * ```
+	     * BLE.startNotification(device_id, "FF10", "FF11").subscribe(buffer => {
+	     *   console.log(String.fromCharCode.apply(null, new Uint8Array(buffer));
+	     * });
+	     * ```
+	     *
+	     * @param {string} device_id  UUID or MAC address of the peripheral
+	     * @param {string} service_uuid  UUID of the BLE service
+	     * @param {string} characteristic_uuid  UUID of the BLE characteristic
+	     * @return Returns an Observable that notifies of characteristic changes.
+	     */
+	    BLE.startNotification = function (deviceId, serviceUUID, characteristicUUID) {
+	        // This Observable is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Observable, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Observable_1.Observable(function (observer) { });
+	    };
+	    ;
+	    /**
+	     * Stop being notified when the value of a characteristic changes.
+	     *
+	     * @param {string} device_id  UUID or MAC address of the peripheral
+	     * @param {string} service_uuid  UUID of the BLE service
+	     * @param {string} characteristic_uuid  UUID of the BLE characteristic
+	     * @return Returns a Promise.
+	     */
+	    BLE.stopNotification = function (deviceId, serviceUUID, characteristicUUID) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    ;
+	    /**
+	     * Report the connection status.
+	     *
+	     * @usage
+	     * ```
+	     * BLE.isConnected('FFCA0B09-CB1D-4DC0-A1EF-31AFD3EDFB53').then(
+	     *   () => { console.log('connected'); },
+	     *   () => { console.log('not connected'); }
+	     * );
+	     * ```
+	     * @param {string} device_id  UUID or MAC address of the peripheral
+	     * @return Returns a Promise.
+	     */
+	    BLE.isConnected = function (deviceId) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Report if bluetooth is enabled.
+	     *
+	     * @usage
+	     * ```
+	     * BLE.isEnabled().then(
+	     *   () => { console.log('enabled'); },
+	     *   () => { console.log('not enabled'); }
+	     * );
+	     * ```
+	     * @return Returns a Promise.
+	     */
+	    BLE.isEnabled = function () {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Open System Bluetooth settings (Android only).
+	     *
+	     * @return Returns a Promise.
+	     */
+	    BLE.showBluetoothSettings = function () {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Enable Bluetooth on the device (Android only).
+	     *
+	     * @return Returns a Promise.
+	     */
+	    BLE.enable = function () {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    __decorate([
+	        plugin_1.Cordova({
+	            observable: true
+	        })
+	    ], BLE, "scan", null);
+	    __decorate([
+	        plugin_1.Cordova({
+	            observable: true,
+	            clearFunction: 'stopScan',
+	            clearWithArgs: true
+	        })
+	    ], BLE, "startScan", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], BLE, "stopScan", null);
+	    __decorate([
+	        plugin_1.Cordova({
+	            observable: true,
+	            clearFunction: 'disconnect',
+	            clearWithArgs: true
+	        })
+	    ], BLE, "connect", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], BLE, "disconnect", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], BLE, "read", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], BLE, "write", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], BLE, "writeWithoutResponse", null);
+	    __decorate([
+	        plugin_1.Cordova({
+	            observable: true,
+	            clearFunction: 'stopNotification',
+	            clearWithArgs: true
+	        })
+	    ], BLE, "startNotification", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], BLE, "stopNotification", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], BLE, "isConnected", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], BLE, "isEnabled", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], BLE, "showBluetoothSettings", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], BLE, "enable", null);
+	    BLE = __decorate([
+	        plugin_1.Plugin({
+	            plugin: 'cordova-plugin-ble-central',
+	            pluginRef: 'ble',
+	            repo: 'https://github.com/don/cordova-plugin-ble-central'
+	        })
+	    ], BLE);
+	    return BLE;
+	})();
+	exports.BLE = BLE;
+	//# sourceMappingURL=ble.js.map
+
+/***/ },
+/* 607 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	var plugin_1 = __webpack_require__(600);
+	/**
+	 * @name Camera
+	 * @description
+	 * Take a photo or capture video.
+	 *
+	 * Requires Cordova plugin: `cordova-plugin-camera`. For more info, please see the [Cordova Camera Plugin Docs](https://github.com/apache/cordova-plugin-camera).
+	 *
+	 * @usage
+	 * ```js
+	 * Camera.getPicture(options).then((imageData) => {
+	 *  // imageData is either a base64 encoded string or a file URI
+	 *  // If it's base64:
+	 *  let base64Image = "data:image/jpeg;base64," + imageData;
+	 * }, (err) => {
+	 * });
+	 * ```
+	 */
+	var Camera = (function () {
+	    function Camera() {
+	    }
+	    /**
+	     * Take a picture or video, or load one from the library.
+	     * @param {CameraOptions} options
+	     * @return Returns a Promise that resolves with Base64 encoding of the image data, or the image file URI, depending on cameraOptions, otherwise rejects with an error.
+	     */
+	    Camera.getPicture = function (options) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    ;
+	    /**
+	     * Remove intermediate image files that are kept in temporary storage after calling camera.getPicture.
+	     * Applies only when the value of Camera.sourceType equals Camera.PictureSourceType.CAMERA and the Camera.destinationType equals Camera.DestinationType.FILE_URI.
+	     * @return Returns a Promise
+	     */
+	    Camera.cleanup = function () { };
+	    ;
+	    __decorate([
+	        plugin_1.Cordova({
+	            callbackOrder: 'reverse'
+	        })
+	    ], Camera, "getPicture", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Camera, "cleanup", null);
+	    Camera = __decorate([
+	        plugin_1.Plugin({
+	            plugin: 'cordova-plugin-camera',
+	            pluginRef: 'navigator.camera',
+	            repo: 'https://github.com/apache/cordova-plugin-camera'
+	        })
+	    ], Camera);
+	    return Camera;
+	})();
+	exports.Camera = Camera;
+	//# sourceMappingURL=camera.js.map
+
+/***/ },
+/* 608 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	var plugin_1 = __webpack_require__(600);
+	/**
+	 * @name Calendar
+	 * @description
+	 * This plugin allows you to add events to the Calendar of the mobile device.
+	 *
+	 * Requires Cordova plugin: `cordova-plugin-calendar`. For more info, please see the [Calendar plugin docs](https://github.com/EddyVerbruggen/Calendar-PhoneGap-Plugin).
+	 *
+	 */
+	var Calendar = (function () {
+	    function Calendar() {
+	    }
+	    /**
+	     * Create a calendar. (iOS only)
+	     *
+	     * @usage
+	     * ```
+	     * Calendar.createCalendar('MyCalendar').then(
+	     *   (msg) => { console.log(msg); },
+	     *   (err) => { console.log(err); }
+	     * );
+	     * ```
+	     *
+	     * @param {string | Object} nameOrOptions  either a string name or a options object.
+	     * options:
+	     *   calendarName: string  the name of the calendar
+	     *   calendarColor: string  the hex color of the calendar
+	     * @return Returns a Promise
+	     */
+	    Calendar.createCalendar = function (nameOrOptions) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Delete a calendar. (iOS only)
+	     *
+	     * @usage
+	     * ```
+	     * Calendar.deleteCalendar('MyCalendar').then(
+	     *   (msg) => { console.log(msg); },
+	     *   (err) => { console.log(err); }
+	     * );
+	     * ```
+	     *
+	     * @param {string} name  Name of the calendar to delete.
+	     * @return Returns a Promise
+	     */
+	    Calendar.deleteCalendar = function (name) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Returns the default calendar options.
+	     *
+	     * @return Returns an object with the default calendar options:
+	     *   firstReminderMinutes: 60,
+	     *   secondReminderMinutes: null,
+	     *   recurrence: null, // options are: 'daily', 'weekly', 'monthly', 'yearly'
+	     *   recurrenceInterval: 1, // only used when recurrence is set
+	     *   recurrenceEndDate: null,
+	     *   calendarName: null,
+	     *   calendarId: null,
+	     *   url: null
+	     */
+	    Calendar.getCalendarOptions = function () {
+	        return {
+	            firstReminderMinutes: 60,
+	            secondReminderMinutes: null,
+	            recurrence: null,
+	            recurrenceInterval: 1,
+	            recurrenceEndDate: null,
+	            calendarName: null,
+	            calendarId: null,
+	            url: null
+	        };
+	    };
+	    /**
+	     * Silently create an event.
+	     *
+	     * @param {string} [title]  The event title
+	     * @param {string} [location]  The event location
+	     * @param {string} [notes]  The event notes
+	     * @param {Date} [startDate]  The event start date
+	     * @param {Date} [endDate]  The event end date
+	     * @return Returns a Promise
+	     */
+	    Calendar.createEvent = function (title, location, notes, startDate, endDate) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Silently create an event with additional options.
+	     *
+	     * @param {string} [title]  The event title
+	     * @param {string} [location]  The event location
+	     * @param {string} [notes]  The event notes
+	     * @param {Date} [startDate]  The event start date
+	     * @param {Date} [endDate]  The event end date
+	     * @param {CalendarOptions} [options]  Additional options, see `getCalendarOptions`
+	     * @return Returns a Promise
+	     */
+	    Calendar.createEventWithOptions = function (title, location, notes, startDate, endDate, options) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Interactively create an event.
+	     *
+	     * @param {string} [title]  The event title
+	     * @param {string} [location]  The event location
+	     * @param {string} [notes]  The event notes
+	     * @param {Date} [startDate]  The event start date
+	     * @param {Date} [endDate]  The event end date
+	     * @return Returns a Promise
+	     */
+	    Calendar.createEventInteractively = function (title, location, notes, startDate, endDate) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Interactively create an event with additional options.
+	     *
+	     * @param {string} [title]  The event title
+	     * @param {string} [location]  The event location
+	     * @param {string} [notes]  The event notes
+	     * @param {Date} [startDate]  The event start date
+	     * @param {Date} [endDate]  The event end date
+	     * @param {CalendarOptions} [options]  Additional options, see `getCalendarOptions`
+	     * @return Returns a Promise
+	     */
+	    Calendar.createEventInteractivelyWithOptions = function (title, location, notes, startDate, endDate, options) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    // deprecated
+	    // @Cordova()
+	    // static createEventInNamedCalendar(
+	    //   title?: string,
+	    //   location?: string,
+	    //   notes?: string,
+	    //   startDate?: Date,
+	    //   endDate?: Date,
+	    //   calendarName?: string
+	    // ) {}
+	    /**
+	     * Find an event.
+	     *
+	     * @param {string} [title]  The event title
+	     * @param {string} [location]  The event location
+	     * @param {string} [notes]  The event notes
+	     * @param {Date} [startDate]  The event start date
+	     * @param {Date} [endDate]  The event end date
+	     * @return Returns a Promise
+	     */
+	    Calendar.findEvent = function (title, location, notes, startDate, endDate) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Find an event with additional options.
+	     *
+	     * @param {string} [title]  The event title
+	     * @param {string} [location]  The event location
+	     * @param {string} [notes]  The event notes
+	     * @param {Date} [startDate]  The event start date
+	     * @param {Date} [endDate]  The event end date
+	     * @param {CalendarOptions} [options]  Additional options, see `getCalendarOptions`
+	     * @return Returns a Promise that resolves with the event, or rejects with an error.
+	     */
+	    Calendar.findEventWithOptions = function (title, location, notes, startDate, endDate, options) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Find a list of events within the specified date range. (Android only)
+	     *
+	     * @param {Date} [startDate]  The start date
+	     * @param {Date} [endDate]  The end date
+	     * @return Returns a Promise that resolves with the list of events, or rejects with an error.
+	     */
+	    Calendar.listEventsInRange = function (startDate, endDate) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Get a list of all calendars.
+	     * @return A Promise that resolves with the list of calendars, or rejects with an error.
+	     */
+	    Calendar.listCalendars = function () {
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Get a list of all future events in the specified calendar. (iOS only)
+	     * @return Returns a Promise that resolves with the list of events, or rejects with an error.
+	     */
+	    Calendar.findAllEventsInNamedCalendar = function (calendarName) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Modify an event. (iOS only)
+	     *
+	     * @param {string} [title]  The event title
+	     * @param {string} [location]  The event location
+	     * @param {string} [notes]  The event notes
+	     * @param {Date} [startDate]  The event start date
+	     * @param {Date} [endDate]  The event end date
+	     * @param {string} [newTitle]  The new event title
+	     * @param {string} [newLocation]  The new event location
+	     * @param {string} [newNotes]  The new event notes
+	     * @param {Date} [newStartDate]  The new event start date
+	     * @param {Date} [newEndDate]  The new event end date
+	     * @return Returns a Promise
+	     */
+	    Calendar.modifyEvent = function (title, location, notes, startDate, endDate, newTitle, newLocation, newNotes, newStartDate, newEndDate) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Modify an event with additional options. (iOS only)
+	     *
+	     * @param {string} [title]  The event title
+	     * @param {string} [location]  The event location
+	     * @param {string} [notes]  The event notes
+	     * @param {Date} [startDate]  The event start date
+	     * @param {Date} [endDate]  The event end date
+	     * @param {string} [newTitle]  The new event title
+	     * @param {string} [newLocation]  The new event location
+	     * @param {string} [newNotes]  The new event notes
+	     * @param {Date} [newStartDate]  The new event start date
+	     * @param {Date} [newEndDate]  The new event end date
+	     * @param {CalendarOptions} [options]  Additional options, see `getCalendarOptions`
+	     * @return Returns a Promise
+	     */
+	    Calendar.modifyEventWithOptions = function (title, location, notes, startDate, endDate, newTitle, newLocation, newNotes, newStartDate, newEndDate, options) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Delete an event.
+	     *
+	     * @param {string} [title]  The event title
+	     * @param {string} [location]  The event location
+	     * @param {string} [notes]  The event notes
+	     * @param {Date} [startDate]  The event start date
+	     * @param {Date} [endDate]  The event end date
+	     * @return Returns a Promise
+	     */
+	    Calendar.deleteEvent = function (title, location, notes, startDate, endDate) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Delete an event from the specified Calendar. (iOS only)
+	     *
+	     * @param {string} [title]  The event title
+	     * @param {string} [location]  The event location
+	     * @param {string} [notes]  The event notes
+	     * @param {Date} [startDate]  The event start date
+	     * @param {Date} [endDate]  The event end date
+	     * @param {string} calendarName
+	     * @return Returns a Promise
+	     */
+	    Calendar.deleteEventFromNamedCalendar = function (title, location, notes, startDate, endDate, calendarName) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Open the calendar at the specified date.
+	     * @return {Date} date
+	     */
+	    Calendar.openCalendar = function (date) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Calendar, "createCalendar", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Calendar, "deleteCalendar", null);
+	    __decorate([
+	        plugin_1.Cordova({
+	            sync: true
+	        })
+	    ], Calendar, "getCalendarOptions", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Calendar, "createEvent", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Calendar, "createEventWithOptions", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Calendar, "createEventInteractively", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Calendar, "createEventInteractivelyWithOptions", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Calendar, "findEvent", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Calendar, "findEventWithOptions", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Calendar, "listEventsInRange", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Calendar, "listCalendars", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Calendar, "findAllEventsInNamedCalendar", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Calendar, "modifyEvent", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Calendar, "modifyEventWithOptions", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Calendar, "deleteEvent", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Calendar, "deleteEventFromNamedCalendar", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Calendar, "openCalendar", null);
+	    Calendar = __decorate([
+	        plugin_1.Plugin({
+	            plugin: 'cordova-plugin-calendar',
+	            pluginRef: 'plugins.calendar',
+	            repo: 'https://github.com/EddyVerbruggen/Calendar-PhoneGap-Plugin'
+	        })
+	    ], Calendar);
+	    return Calendar;
+	})();
+	exports.Calendar = Calendar;
+	//# sourceMappingURL=calendar.js.map
+
+/***/ },
+/* 609 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	var plugin_1 = __webpack_require__(600);
+	/**
+	 * Clipboard management plugin for Cordova that supports iOS, Android, and Windows Phone 8.
+	 *
+	 * Requires Cordova plugin: https://github.com/VersoSolutions/CordovaClipboard
+	 * For more info, please see the [Clipboard plugin docs](https://github.com/VersoSolutions/CordovaClipboard.git).
+	 *
+	 * ```
+	 * cordova plugin add https://github.com/VersoSolutions/CordovaClipboard.git
+	 * ```
+	 *
+	 * @usage
+	 * ```js
+	 * Clipboard.copy("Hello world");
+	 *
+	 * Clipboard.paste().then(
+	 *    (resolve : string) => {
+	  *     alert(resolve);
+	*     },
+	 *     (reject : string) => {
+	 *     alert("Error: " + reject);
+	 *     }
+	*     );
+	 * );
+	 * ```
+	 */
+	var Clipboard = (function () {
+	    function Clipboard() {
+	    }
+	    /**
+	     * Copies the given text
+	     * @param text
+	     * @returns {Promise<T>}
+	     */
+	    Clipboard.copy = function (text) {
+	        return new Promise(function (res, resj) { });
+	    };
+	    /**
+	     * Pastes the text stored in clipboard
+	     * @returns {Promise<T>}
+	     */
+	    Clipboard.paste = function () {
+	        return new Promise(function (res, rej) { });
+	    };
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Clipboard, "copy", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Clipboard, "paste", null);
+	    Clipboard = __decorate([
+	        plugin_1.Plugin({
+	            plugin: 'https://github.com/VersoSolutions/CordovaClipboard.git',
+	            pluginRef: 'cordova.plugins.clipboard'
+	        })
+	    ], Clipboard);
+	    return Clipboard;
+	})();
+	exports.Clipboard = Clipboard;
+	//# sourceMappingURL=clipboard.js.map
+
+/***/ },
+/* 610 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	var plugin_1 = __webpack_require__(600);
+	/**
+	 * @name Contacts
+	 * @description
+	 * Access and manage Contacts on the device.
+	 *
+	 * Requires plugin: `cordova-plugin-contacts`
+	 * For full info, please see the [Cordova Contacts plugin docs](https://github.com/apache/cordova-plugin-contacts)
+	 *
+	 * @usage
+	 *
+	 * ```js
+	 * Contacts.save({
+	 *   displayName: "Mr. Ionitron"
+	 * }).then((contact) => {}, (err) => {})
+	 * ```
+	 *
+	 * See the `save()` docs for a full list of fields.
+	 *
+	 */
+	var Contacts = (function () {
+	    function Contacts() {
+	    }
+	    /**
+	     * Create a new Contact object.
+	     *
+	     * @param options {Object} Object whose properties the created Contact should have.
+	     * @return {Contact} Returns the created contact
+	     */
+	    Contacts.create = function (options) {
+	        return new Contact();
+	    };
+	    ;
+	    /**
+	     * Search for contacts in the Contacts list.
+	     *
+	     * Example: Contacts.find(['*'], { filter: 'Max' }) // will search for a displayName of 'Max'
+	     *
+	     * @param fields {string[]}  Contact fields to be used as a search qualifier.
+	     *  A zero-length contactFields parameter is invalid and results in ContactError.INVALID_ARGUMENT_ERROR.
+	     *  A contactFields value of "*" searches all contact fields.
+	     *
+	     * @param options {Object} the options to query with:
+	     *   filter: The search string used to find navigator.contacts. (string) (Default: "")
+	     *   multiple: Determines if the find operation returns multiple navigator.contacts. (Boolean) (Default: false)
+	     *   desiredFields: Contact fields to be returned back. If specified, the resulting Contact object only features values for these fields. (DOMString[]) [Optional]
+	     *   hasPhoneNumber(Android only): Filters the search to only return contacts with a phone number informed. (Boolean) (Default: false)
+	     *
+	     * @return Returns a Promise that resolves with the search results (an array of Contact objects)
+	     */
+	    Contacts.find = function (fields, options) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    ;
+	    /**
+	     * Select a single Contact.
+	     * @return Returns a Promise that resolves with the selected Contact
+	     */
+	    Contacts.pickContact = function () {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    ;
+	    __decorate([
+	        plugin_1.Cordova({
+	            sync: true
+	        })
+	    ], Contacts, "create", null);
+	    __decorate([
+	        plugin_1.Cordova({
+	            successIndex: 1,
+	            errorIndex: 2
+	        })
+	    ], Contacts, "find", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Contacts, "pickContact", null);
+	    Contacts = __decorate([
+	        plugin_1.Plugin({
+	            plugin: 'cordova-plugin-contacts',
+	            pluginRef: 'navigator.contacts',
+	            repo: 'https://github.com/apache/cordova-plugin-contacts'
+	        })
+	    ], Contacts);
+	    return Contacts;
+	})();
+	exports.Contacts = Contacts;
+	//# sourceMappingURL=contacts.js.map
+
+/***/ },
+/* 611 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	var plugin_1 = __webpack_require__(600);
+	/**
+	 * The DatePicker plugin allows the user to fetch date or time using native dialogs.
+	 *
+	 * Platforms supported: iOS, Android, Windows
+	 *
+	 * Requires cordova-plugin-datepicker by VitaliiBlagodir that can be [found here](https://github.com/VitaliiBlagodir/cordova-plugin-datepicker).
+	 *
+	 * Install the plugin by running the following command:
+	 * ```shell
+	 * ionic plugin add cordova-plugin-datepicker
+	 * ```
+	 *
+	 * @usage
+	 * ```js
+	 * DatePicker.
+	 * ```
+	 *
+	 */
+	var DatePicker = (function () {
+	    function DatePicker() {
+	    }
+	    /**
+	     * Shows the date and/or time picker dialog(s)
+	     * @param options
+	     * @returns {Promise<Date>} Returns a promise that resolves with the picked date and/or time, or rejects with an error.
+	     */
+	    DatePicker.show = function (options) {
+	        return new Promise(function (res, rej) { });
+	    };
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], DatePicker, "show", null);
+	    DatePicker = __decorate([
+	        plugin_1.Plugin({
+	            plugin: 'cordova-plugin-datepicker',
+	            pluginRef: 'plugins.datePicker'
+	        })
+	    ], DatePicker);
+	    return DatePicker;
+	})();
+	exports.DatePicker = DatePicker;
+	//# sourceMappingURL=datepicker.js.map
+
+/***/ },
+/* 612 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	var plugin_1 = __webpack_require__(600);
+	/**
+	 * @name Device
+	 * @description
+	 * Access information about the underlying device and platform.
+	 *
+	 * @usage
+	 * ```js
+	 * let info = Device.getDevice();
+	 * ```
+	 */
+	var Device = (function () {
+	    function Device() {
+	    }
+	    Object.defineProperty(Device, "device", {
+	        /**
+	         * Returns the whole device object.
+	         *
+	         * @returns {Object} The device object.
+	         */
+	        get: function () {
+	            return window.device;
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    __decorate([
+	        plugin_1.CordovaProperty
+	    ], Device, "device", null);
+	    Device = __decorate([
+	        plugin_1.Plugin({
+	            name: 'Device',
+	            plugin: 'cordova-plugin-device',
+	            pluginRef: 'device',
+	            repo: 'https://github.com/apache/cordova-plugin-device'
+	        })
+	    ], Device);
+	    return Device;
+	})();
+	exports.Device = Device;
+	//# sourceMappingURL=device.js.map
+
+/***/ },
+/* 613 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	var plugin_1 = __webpack_require__(600);
+	/**
+	 * @name Facebook
+	 * @description
+	 * Use the Facebook Connect plugin to obtain access to the native FB application on iOS and Android.
+	 *
+	 * Requires Cordova plugin: `cordova-plugin-facebook4`. For more info, please see the [Facebook Connect](https://github.com/jeduan/cordova-plugin-facebook4).
+	 *
+	 * #### Installation
+	 *
+	 *  To use the FB plugin, you first have to create a new Facebook App inside of the Facebook developer portal at [https://developers.facebook.com/apps](https://developers.facebook.com/apps).
+	 *
+	 * [![fb-getstarted-1](/img/docs/native/Facebook/1.png)](https://developers.facebook.com/apps/)
+	 *
+	 * Retrieve the `App ID` and `App Name`.
+	 *
+	 * [![fb-getstarted-2](/img/docs/native/Facebook/2.png)](https://developers.facebook.com/apps/)
+	 *
+	 * Then type in the following command in your Terminal, where APP_ID and APP_NAME are the values from the Facebook Developer portal.
+	 *
+	 * ```bash
+	 *  cordova plugin add cordova-plugin-facebook4 --save --variable APP_ID="123456789" --variable APP_NAME="myApplication"
+	 * ```
+	 *
+	 * After, you'll need to add the native platforms you'll be using to your app in the Facebook Developer portal under your app's Settings:
+	 *
+	 * [![fb-getstarted-3](/img/docs/native/Facebook/3.png)](https://developers.facebook.com/apps/)
+	 *
+	 * Click `'Add Platform'`.
+	 *
+	 * [![fb-getstarted-4](/img/docs/native/Facebook/4.png)](https://developers.facebook.com/apps/)
+	 *
+	 * At this point you'll need to open your project's [`config.xml`](https://cordova.apache.org/docs/en/latest/config_ref/index.html) file, found in the root directory of your project.
+	 *
+	 * Take note of the `id` for the next step:
+	 * ```
+	 * <widget id="com.mycompany.testapp" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+	 * ```
+	 *
+	 * You can also edit the `id` to whatever you'd like it to be.
+	 *
+	 * #### iOS Install
+	 * Under 'Bundle ID', add the `id` from your `config.xml` file:
+	 *
+	 * [![fb-getstarted-5](/img/docs/native/Facebook/5.png)](https://developers.facebook.com/apps/)
+	 *
+	 *
+	 * #### Android Install
+	 * Under 'Google Play Package Name', add the `id` from your `config.xml` file:
+	 *
+	 * [![fb-getstarted-6](/img/docs/native/Facebook/6.png)](https://developers.facebook.com/apps/)
+	 *
+	 *
+	 * And that's it! You can now make calls to Facebook using the plugin.
+	 *
+	 * ## Events
+	 *
+	 * App events allow you to understand the makeup of users engaging with your app, measure the performance of your Facebook mobile app ads, and reach specific sets of your users with Facebook mobile app ads.
+	 *
+	 * - [iOS] [https://developers.facebook.com/docs/ios/app-events](https://developers.facebook.com/docs/ios/app-events)
+	 * - [Android] [https://developers.facebook.com/docs/android/app-events](https://developers.facebook.com/docs/android/app-events)
+	 * - [JS] Does not have an Events API, so the plugin functions are empty and will return an automatic success
+	 *
+	 * Activation events are automatically tracked for you in the plugin.
+	 *
+	 * Events are listed on the [insights page](https://www.facebook.com/insights/).
+	 *
+	 * For tracking events, see `logEvent` and `logPurchase`.
+	 *
+	 */
+	var Facebook = (function () {
+	    function Facebook() {
+	    }
+	    // @Cordova()
+	    // static browserInit(appId: number){
+	    //   return new Promise<any>((res, rej) => {});
+	    // }
+	    /**
+	     * Login to Facebook to authenticate this app.
+	     *
+	     * ```ts
+	     * {
+	     *   status: "connected",
+	     *   authResponse: {
+	     *     session_key: true,
+	     *     accessToken: "kgkh3g42kh4g23kh4g2kh34g2kg4k2h4gkh3g4k2h4gk23h4gk2h34gk234gk2h34AndSoOn",
+	     *     expiresIn: 5183979,
+	     *     sig: "...",
+	     *     secret: "...",
+	     *     userID: "634565435"
+	     *   }
+	     * }
+	     * ```
+	     *
+	     * @param {string[]}  permissions List of [permissions](https://developers.facebook.com/docs/facebook-login/permissions) this app has upon logging in.
+	     * @return Returns a Promise that resolves with a status object if login succeeds, and rejects if login fails.
+	     */
+	    Facebook.login = function (permissions) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Logout of Facebook.
+	     *
+	     * For more info see the [Facebook docs](https://developers.facebook.com/docs/reference/javascript/FB.logout)
+	     * @return Returns a Promise that resolves on a successful logout, and rejects if logout fails.
+	     */
+	    Facebook.logout = function () {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Determine if a user is logged in to Facebook and has authenticated your app.  There are three possible states for a user:
+	     *
+	     * 1) the user is logged into Facebook and has authenticated your application (connected)
+	     * 2) the user is logged into Facebook but has not authenticated your application (not_authorized)
+	     * 3) the user is either not logged into Facebook or explicitly logged out of your application so it doesn't attempt to connect to Facebook and thus, we don't know if they've authenticated your application or not (unknown)
+	     *
+	     * Resolves with a response like:
+	     *
+	     * ```
+	     * {
+	     *   authResponse: {
+	     *     userID: "12345678912345",
+	     *     accessToken: "kgkh3g42kh4g23kh4g2kh34g2kg4k2h4gkh3g4k2h4gk23h4gk2h34gk234gk2h34AndSoOn",
+	     *     session_Key: true,
+	     *     expiresIn: "5183738",
+	     *     sig: "..."
+	     *   },
+	     *   status: "connected"
+	     * }
+	     * ```
+	     *
+	     * For more information see the [Facebook docs](https://developers.facebook.com/docs/reference/javascript/FB.getLoginStatus)
+	     *
+	     * @return Returns a Promise that resolves with a status, or rejects with an error
+	     */
+	    Facebook.getLoginStatus = function () {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Get a Facebook access token for using Facebook services.
+	     *
+	     * @return Returns a Promise that resolves with an access token, or rejects with an error
+	     */
+	    Facebook.getAccessToken = function () {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Show one of various Facebook dialogs. Example of options for a Share dialog:
+	     *
+	     * ```
+	     * {
+	     *   method: "share",
+	     *   href: "http://example.com",
+	     *   caption: "Such caption, very feed.",
+	     *   description: "Much description",
+	     *   picture: 'http://example.com/image.png'
+	     * }
+	     * ```
+	     *
+	     * For more options see the [Cordova plugin docs](https://github.com/jeduan/cordova-plugin-facebook4#show-a-dialog) and the [Facebook docs](https://developers.facebook.com/docs/javascript/reference/FB.ui)
+	     * @options {Object}  options The dialog options
+	     * @return Returns a Promise that resolves with success data, or rejects with an error
+	     */
+	    Facebook.showDialog = function (options) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Make a call to Facebook Graph API. Can take additional permissions beyond those granted on login.
+	     *
+	     * For more information see:
+	     *
+	     *  Calling the Graph API - https://developers.facebook.com/docs/javascript/reference/FB.api
+	     *  Graph Explorer - https://developers.facebook.com/tools/explorer
+	     *  Graph API - https://developers.facebook.com/docs/graph-api
+	     *
+	     * @param {string}  requestPath Graph API endpoint you want to call
+	     * @param {string[]}  permissions List of [permissions](https://developers.facebook.com/docs/facebook-login/permissions) for this request.
+	     * @return Returns a Promise that resolves with the result of the request, or rejects with an error
+	     */
+	    Facebook.api = function (requestPath, permissions) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Log an event.  For more information see the Events section above.
+	     *
+	     * @param {string}  name Name of the event
+	     * @param {Object}  [params] An object containing extra data to log with the event
+	     * @param {number}  [valueToSum] any value to be added to added to a sum on each event
+	     * @return
+	     */
+	    Facebook.logEvent = function (name, params, valueToSum) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Log a purchase. For more information see the Events section above.
+	     *
+	     * @param {number}  value Value of the purchase.
+	     * @param {string}  currency The currency, as an [ISO 4217 currency code](http://en.wikipedia.org/wiki/ISO_4217)
+	     * @return Returns a Promise
+	     */
+	    Facebook.logPurchase = function (value, currency) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Open App Invite dialog. Does not require login.
+	     *
+	     * For more information see:
+	     *
+	     *   the App Invites Overview - https://developers.facebook.com/docs/app-invites/overview
+	     *   the App Links docs - https://developers.facebook.com/docs/applinks
+	     *
+	     *
+	     * @param {Object}  options An object containing an [App Link](https://developers.facebook.com/docs/applinks) URL to your app and an optional image URL.
+	     *   url: [App Link](https://developers.facebook.com/docs/applinks) to your app
+	     *   picture: image to be displayed in the App Invite dialog
+	     *
+	     * @return Returns a Promise that resolves with the result data, or rejects with an error
+	     */
+	    Facebook.appInvite = function (options) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Facebook, "login", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Facebook, "logout", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Facebook, "getLoginStatus", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Facebook, "getAccessToken", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Facebook, "showDialog", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Facebook, "api", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Facebook, "logEvent", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Facebook, "logPurchase", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Facebook, "appInvite", null);
+	    Facebook = __decorate([
+	        plugin_1.Plugin({
+	            plugin: 'cordova-plugin-facebook4',
+	            pluginRef: 'facebookConnectPlugin',
+	            repo: 'https://github.com/jeduan/cordova-plugin-facebook4'
+	        })
+	    ], Facebook);
+	    return Facebook;
+	})();
+	exports.Facebook = Facebook;
+	//# sourceMappingURL=facebook.js.map
+
+/***/ },
+/* 614 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	var plugin_1 = __webpack_require__(600);
+	var Observable_1 = __webpack_require__(56);
+	/**
+	 * @name Geolocation
+	 * @description
+	 * This plugin provides information about the device's location, such as latitude and longitude. Common sources of location information include Global Positioning System (GPS) and location inferred from network signals such as IP address, RFID, WiFi and Bluetooth MAC addresses, and GSM/CDMA cell IDs.
+	 *
+	 *  This API is based on the W3C Geolocation API Specification, and only executes on devices that don't already provide an implementation.
+	 *
+	 * @usage
+	 *
+	 * ```ts
+	 * Geolocation.getCurrentPosition().then((resp) => {
+	 *  //resp.coords.latitude
+	 *  //resp.coords.longitude
+	 * })
+	 *
+	 * let watch = Geolocation.watchPosition();
+	 * watch.subscribe((data) => {
+	 *  //data.coords.latitude
+	 *  //data.coords.longitude
+	 * })
+	 * ```
+	 */
+	var Geolocation = (function () {
+	    function Geolocation() {
+	    }
+	    /**
+	     * Get the device's current position.
+	     *
+	     * @param {GeolocationOptions} options  The [geolocation options](https://developer.mozilla.org/en-US/docs/Web/API/PositionOptions).
+	     * @return Returns a Promise that resolves with the [position](https://developer.mozilla.org/en-US/docs/Web/API/Position) of the device, or rejects with an error.
+	     */
+	    Geolocation.getCurrentPosition = function (options) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Watch the current device's position.  Clear the watch by unsubscribing from
+	     * Observable changes.
+	     *
+	     * ```ts
+	     * var subscription = Geolocation.watchPosition().subscribe(position => {
+	     *   console.log(position.coords.longitude + ' ' + position.coords.latitude);
+	     * });
+	     *
+	     * // To stop notifications
+	     * subscription.unsubscribe();
+	     * ```
+	     *
+	     * @param {GeolocationOptions} options  The [geolocation options](https://developer.mozilla.org/en-US/docs/Web/API/PositionOptions).
+	     * @return Returns an Observable that notifies with the [position](https://developer.mozilla.org/en-US/docs/Web/API/Position) of the device, or errors.
+	     */
+	    Geolocation.watchPosition = function (options) {
+	        // This Observable is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Observable, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Observable_1.Observable(function (observer) { });
+	    };
+	    ;
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Geolocation, "getCurrentPosition", null);
+	    __decorate([
+	        plugin_1.Cordova({
+	            callbackOrder: 'reverse',
+	            observable: true,
+	            clearFunction: 'clearWatch'
+	        })
+	    ], Geolocation, "watchPosition", null);
+	    Geolocation = __decorate([
+	        plugin_1.Plugin({
+	            plugin: 'cordova-plugin-geolocation',
+	            pluginRef: 'navigator.geolocation'
+	        })
+	    ], Geolocation);
+	    return Geolocation;
+	})();
+	exports.Geolocation = Geolocation;
+	//# sourceMappingURL=geolocation.js.map
+
+/***/ },
+/* 615 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	var plugin_1 = __webpack_require__(600);
+	/**
+	 * @name Push
+	 * @description
+	 * Register and receive push notifications.
+	 *
+	 * Requires Cordova plugin: `phonegap-plugin-push`. For more info, please see the [Push plugin docs](https://github.com/phonegap/phonegap-plugin-push).
+	 *
+	 *
+	 * For TypeScript users, see the [Push plugin docs about using TypeScript for custom notifications](https://github.com/phonegap/phonegap-plugin-push/blob/master/docs/TYPESCRIPT.md).
+	 */
+	var Push = (function () {
+	    function Push() {
+	    }
+	    /**
+	     * Initialize the plugin on the native side.
+	     *
+	     * ```
+	     * var push = Push.init({
+	     *    android: {
+	     *        senderID: "12345679"
+	     *    },
+	     *    ios: {
+	     *        alert: "true",
+	     *        badge: true,
+	     *        sound: 'false'
+	     *    },
+	     *    windows: {}
+	     * });
+	     * ```
+	     *
+	     * @param {PushOptions} options  The Push [options](https://github.com/phonegap/phonegap-plugin-push/blob/master/docs/API.md#parameters).
+	     * @return {PushNotification}  Returns a new [PushNotification](https://github.com/phonegap/phonegap-plugin-push/blob/master/docs/API.md#pushonevent-callback) object.
+	     */
+	    Push.init = function (options) {
+	        return new PushNotification();
+	    };
+	    /**
+	     * Check whether the push notification permission has been granted.
+	     * @return {Promise} Returns a Promise that resolves with an object with one property: isEnabled, a boolean that indicates if permission has been granted.
+	     */
+	    Push.hasPermission = function () {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    __decorate([
+	        plugin_1.Cordova({
+	            sync: true
+	        })
+	    ], Push, "init", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Push, "hasPermission", null);
+	    Push = __decorate([
+	        plugin_1.Plugin({
+	            plugin: 'phonegap-plugin-push',
+	            pluginRef: 'PushNotification',
+	            repo: 'https://github.com/phonegap/phonegap-plugin-push'
+	        })
+	    ], Push);
+	    return Push;
+	})();
+	exports.Push = Push;
+	//# sourceMappingURL=push.js.map
+
+/***/ },
+/* 616 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	var plugin_1 = __webpack_require__(600);
+	/**
+	 *
+	 * Manage the appearance of the native status bar.
+	 *
+	 * Requires Cordova plugin: `cordova-plugin-statusbar`. For more info, please see the [StatusBar plugin docs](https://github.com/apache/cordova-plugin-statusbar).
+	 */
+	var StatusBar = (function () {
+	    function StatusBar() {
+	    }
+	    /**
+	     * Set whether the status bar overlays the main app view. The default
+	     * is true.
+	     *
+	     * @param {boolean} doesOverlay  Whether the status bar overlays the main app view.
+	     */
+	    StatusBar.overlaysWebView = function (doesOverlay) { };
+	    ;
+	    /**
+	     * Use the default statusbar (dark text, for light backgrounds).
+	     */
+	    StatusBar.styleDefault = function () { };
+	    ;
+	    /**
+	     * Use the lightContent statusbar (light text, for dark backgrounds).
+	     */
+	    StatusBar.styleLightContent = function () { };
+	    ;
+	    /**
+	     * Use the blackTranslucent statusbar (light text, for dark backgrounds).
+	     */
+	    StatusBar.styleBlackTranslucent = function () { };
+	    ;
+	    /**
+	     * Use the blackOpaque statusbar (light text, for dark backgrounds).
+	     */
+	    StatusBar.styleBlackOpaque = function () { };
+	    ;
+	    /**
+	     * Set the status bar to a specific named color. Valid options:
+	     * black, darkGray, lightGray, white, gray, red, green, blue, cyan, yellow, magenta, orange, purple, brown.
+	     *
+	     * iOS note: you must call StatusBar.setOverlay(false) to enable color changing.
+	     *
+	     * @param {string} colorName  The name of the color (from above)
+	     */
+	    StatusBar.backgroundColorByName = function (colorName) { };
+	    ;
+	    /**
+	     * Set the status bar to a specific hex color (CSS shorthand supported!).
+	     *
+	     * iOS note: you must call StatusBar.setOverlay(false) to enable color changing.
+	     *
+	     * @param {string} hexString  The hex value of the color.
+	     */
+	    StatusBar.backgroundColorByHexString = function (hexString) { };
+	    ;
+	    /**
+	     * Hide the StatusBar
+	     */
+	    StatusBar.hide = function () { };
+	    ;
+	    /**
+	    * Show the StatusBar
+	    */
+	    StatusBar.show = function () { };
+	    ;
+	    Object.defineProperty(StatusBar, "isVisible", {
+	        /**
+	         * Whether the StatusBar is currently visible or not.
+	         */
+	        get: function () {
+	            return window.StatusBar.isVisible;
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    __decorate([
+	        plugin_1.Cordova({
+	            sync: true
+	        })
+	    ], StatusBar, "overlaysWebView", null);
+	    __decorate([
+	        plugin_1.Cordova({
+	            sync: true
+	        })
+	    ], StatusBar, "styleDefault", null);
+	    __decorate([
+	        plugin_1.Cordova({
+	            sync: true
+	        })
+	    ], StatusBar, "styleLightContent", null);
+	    __decorate([
+	        plugin_1.Cordova({
+	            sync: true
+	        })
+	    ], StatusBar, "styleBlackTranslucent", null);
+	    __decorate([
+	        plugin_1.Cordova({
+	            sync: true
+	        })
+	    ], StatusBar, "styleBlackOpaque", null);
+	    __decorate([
+	        plugin_1.Cordova({
+	            sync: true
+	        })
+	    ], StatusBar, "backgroundColorByName", null);
+	    __decorate([
+	        plugin_1.Cordova({
+	            sync: true
+	        })
+	    ], StatusBar, "backgroundColorByHexString", null);
+	    __decorate([
+	        plugin_1.Cordova({
+	            sync: true
+	        })
+	    ], StatusBar, "hide", null);
+	    __decorate([
+	        plugin_1.Cordova({
+	            sync: true
+	        })
+	    ], StatusBar, "show", null);
+	    __decorate([
+	        plugin_1.CordovaProperty
+	    ], StatusBar, "isVisible", null);
+	    StatusBar = __decorate([
+	        plugin_1.Plugin({
+	            plugin: 'cordova-plugin-statusbar',
+	            pluginRef: 'StatusBar',
+	            repo: 'https://github.com/apache/cordova-plugin-statusbar'
+	        })
+	    ], StatusBar);
+	    return StatusBar;
+	})();
+	exports.StatusBar = StatusBar;
+	//# sourceMappingURL=statusbar.js.map
+
+/***/ },
+/* 617 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	var plugin_1 = __webpack_require__(600);
+	var Observable_1 = __webpack_require__(56);
+	/**
+	 * This plugin allows you to show a native Toast (a little text popup) on iOS, Android and WP8. It's great for showing a non intrusive native notification which is guaranteed always in the viewport of the browser.
+	 *
+	 * Requires Cordova plugin: `cordova-plugin-x-toast`. For more info, please see the [Toast plugin docs](https://github.com/EddyVerbruggen/Toast-PhoneGap-Plugin).
+	 */
+	var Toast = (function () {
+	    function Toast() {
+	    }
+	    /**
+	     * Show a native toast for the given duration at the specified position.
+	     *
+	     * @param {string} message  The message to display.
+	     * @param {string} duration  Duration to show the toast, either 'short' or 'long'.
+	     * @param {string} position  Where to position the toast, either 'top', 'center', or 'bottom'.
+	     * @return {Observable}  Returns an Observable that notifies first on success and then when tapped, rejects on error.
+	     */
+	    Toast.show = function (message, duration, position) {
+	        // This Observable is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Observable, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Observable_1.Observable(function (observer) { });
+	    };
+	    /**
+	     * Manually hide any currently visible toast.
+	     * @return {Promise} Returns a Promise that resolves on success.
+	     */
+	    Toast.hide = function () {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Show a native toast with the given options.
+	     *
+	     * @param {Object} options  Options for showing a toast. Available options:
+	     *   message  The message to display.
+	     *   duration  Duration to show the toast, either 'short' or 'long'.
+	     *   position  Where to position the toast, either 'top', 'center', or 'bottom'.
+	     *   addPixelsY  Offset in pixels to move the toast up or down from its specified position.
+	     *
+	     * @return {Observable}  Returns an Observable that notifies first on success and then when tapped, rejects on error.
+	     */
+	    Toast.showWithOptions = function (options) {
+	        // This Observable is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Observable, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Observable_1.Observable(function (observer) { });
+	    };
+	    /**
+	     * Shorthand for `show(message, 'short', 'top')`.
+	     * @return {Observable}  Returns an Observable that notifies first on success and then when tapped, rejects on error.
+	     */
+	    Toast.showShortTop = function (message) {
+	        // This Observable is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Observable, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Observable_1.Observable(function (observer) { });
+	    };
+	    /**
+	     * Shorthand for `show(message, 'short', 'center')`.
+	     * @return {Observable}  Returns an Observable that notifies first on success and then when tapped, rejects on error.
+	     */
+	    Toast.showShortCenter = function (message) {
+	        // This Observable is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Observable, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Observable_1.Observable(function (observer) { });
+	    };
+	    /**
+	     * Shorthand for `show(message, 'short', 'bottom')`.
+	     * @return {Observable}  Returns an Observable that notifies first on success and then when tapped, rejects on error.
+	     */
+	    Toast.showShortBottom = function (message) {
+	        // This Observable is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Observable, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Observable_1.Observable(function (observer) { });
+	    };
+	    /**
+	     * Shorthand for `show(message, 'long', 'top')`.
+	     * @return {Observable}  Returns an Observable that notifies first on success and then when tapped, rejects on error.
+	     */
+	    Toast.showLongTop = function (message) {
+	        // This Observable is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Observable, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Observable_1.Observable(function (observer) { });
+	    };
+	    /**
+	     * Shorthand for `show(message, 'long', 'center')`.
+	     * @return {Observable}  Returns an Observable that notifies first on success and then when tapped, rejects on error.
+	     */
+	    Toast.showLongCenter = function (message) {
+	        // This Observable is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Observable, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Observable_1.Observable(function (observer) { });
+	    };
+	    /**
+	     * Shorthand for `show(message, 'long', 'bottom')`.
+	     * @return {Observable}  Returns an Observable that notifies first on success and then when tapped, rejects on error.
+	     */
+	    Toast.showLongBottom = function (message) {
+	        // This Observable is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Observable, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Observable_1.Observable(function (observer) { });
+	    };
+	    __decorate([
+	        plugin_1.Cordova({
+	            observable: true,
+	            clearFunction: 'hide'
+	        })
+	    ], Toast, "show", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], Toast, "hide", null);
+	    __decorate([
+	        plugin_1.Cordova({
+	            observable: true,
+	            clearFunction: 'hide'
+	        })
+	    ], Toast, "showWithOptions", null);
+	    __decorate([
+	        plugin_1.Cordova({
+	            observable: true,
+	            clearFunction: 'hide'
+	        })
+	    ], Toast, "showShortTop", null);
+	    __decorate([
+	        plugin_1.Cordova({
+	            observable: true,
+	            clearFunction: 'hide'
+	        })
+	    ], Toast, "showShortCenter", null);
+	    __decorate([
+	        plugin_1.Cordova({
+	            observable: true,
+	            clearFunction: 'hide'
+	        })
+	    ], Toast, "showShortBottom", null);
+	    __decorate([
+	        plugin_1.Cordova({
+	            observable: true,
+	            clearFunction: 'hide'
+	        })
+	    ], Toast, "showLongTop", null);
+	    __decorate([
+	        plugin_1.Cordova({
+	            observable: true,
+	            clearFunction: 'hide'
+	        })
+	    ], Toast, "showLongCenter", null);
+	    __decorate([
+	        plugin_1.Cordova({
+	            observable: true,
+	            clearFunction: 'hide'
+	        })
+	    ], Toast, "showLongBottom", null);
+	    Toast = __decorate([
+	        plugin_1.Plugin({
+	            plugin: 'cordova-plugin-x-toast',
+	            pluginRef: 'plugins.toast',
+	            repo: 'https://github.com/EddyVerbruggen/Toast-PhoneGap-Plugin'
+	        })
+	    ], Toast);
+	    return Toast;
+	})();
+	exports.Toast = Toast;
+	//# sourceMappingURL=toast.js.map
+
+/***/ },
+/* 618 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	var plugin_1 = __webpack_require__(600);
+	/**
+	 * @name TouchID
+	 * @description
+	 * Scan the fingerprint of a user with the TouchID sensor.
+	 *
+	 * Requires Cordova plugin: `cordova-plugin-touch-id`. For more info, please see the [TouchID plugin docs](https://github.com/EddyVerbruggen/cordova-plugin-touch-id).
+	 *
+	 * ### Error Codes
+	 *
+	 * The plugin will reject for various reasons. Your app will most likely need to respond to the cases differently.
+	 *
+	 * Here is a list of some of the error codes:
+	 *
+	 *  -  `-1` - Fingerprint scan failed more than 3 times
+	 *  -  `-2` or `-128` - User tapped the 'Cancel' button
+	 *  -  `-3` - User tapped the 'Enter Passcode' or 'Enter Password' button
+	 *  -  `-4` - The scan was cancelled by the system (Home button for example)
+	 *  -  `-6` - TouchID is not Available
+	 *  -  `-8` - TouchID is locked out from too many tries
+	 *
+	 */
+	var TouchID = (function () {
+	    function TouchID() {
+	    }
+	    /**
+	     * Whether TouchID is available or not.
+	     *
+	     * @return {Promise} Returns a Promise that resolves if yes, rejects if no.
+	     */
+	    TouchID.prototype.isAvailable = function () {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    ;
+	    /**
+	     * Show TouchID dialog and wait for a fingerprint scan. If user taps 'Enter Password' button, brings up standard system passcode screen.
+	     *
+	     * @param {string} message  The message to display
+	     * @return {Promise} Returns a Promise the resolves if the fingerprint scan was successful, rejects with an error code (see above).
+	     */
+	    TouchID.verifyFingerprint = function (message) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Show TouchID dialog and wait for a fingerprint scan. If user taps 'Enter Password' button, rejects with code '-3' (see above).
+	     *
+	     * @param {string} message  The message to display
+	     * @return {Promise} Returns a Promise the resolves if the fingerprint scan was successful, rejects with an error code (see above).
+	     */
+	    TouchID.verifyFingerprintWithCustomPasswordFallback = function (message) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    /**
+	     * Show TouchID dialog with custom 'Enter Password' message and wait for a fingerprint scan. If user taps 'Enter Password' button, rejects with code '-3' (see above).
+	     *
+	     * @param {string} message  The message to display
+	     * @param {string} enterPasswordLabel  Custom text for the 'Enter Password' button
+	     * @return {Promise} Returns a Promise the resolves if the fingerprint scan was successful, rejects with an error code (see above).
+	     */
+	    TouchID.verifyFingerprintWithCustomPasswordFallbackAndEnterPasswordLabel = function (message, enterPasswordLabel) {
+	        // This Promise is replaced by one from the @Cordova decorator that wraps
+	        // the plugin's callbacks. We provide a dummy one here so TypeScript
+	        // knows that the correct return type is Promise, because there's no way
+	        // for it to know the return type from a decorator.
+	        // See https://github.com/Microsoft/TypeScript/issues/4881
+	        return new Promise(function (res, rej) { });
+	    };
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], TouchID.prototype, "isAvailable", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], TouchID, "verifyFingerprint", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], TouchID, "verifyFingerprintWithCustomPasswordFallback", null);
+	    __decorate([
+	        plugin_1.Cordova()
+	    ], TouchID, "verifyFingerprintWithCustomPasswordFallbackAndEnterPasswordLabel", null);
+	    TouchID = __decorate([
+	        plugin_1.Plugin({
+	            plugin: 'cordova-plugin-touch-id',
+	            pluginRef: 'plugins.touchid',
+	            repo: 'https://github.com/EddyVerbruggen/cordova-plugin-touch-id'
+	        })
+	    ], TouchID);
+	    return TouchID;
+	})();
+	exports.TouchID = TouchID;
+	//# sourceMappingURL=touchid.js.map
+
+/***/ },
+/* 619 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';

@@ -8,11 +8,12 @@ import {SubmitPage} from './pages/submit/submit';
 import {FavoriteListPage} from './pages/favorite-list/favorite-list';
 import {MealService} from './services/meal-service';
 import {CookService} from './services/cook-service';
+import {GooglebooksService} from './services/googlebooks-service';
 
 @App({
     templateUrl: 'build/app.html',
     config: {},
-    providers: [MealService, CookService]
+    providers: [MealService, CookService, GooglebooksService]
 })
 class MyApp {
 

@@ -9,57 +9,79 @@
 
 <ion-content>
     
-    <div *ngIf="book == null">
+    <div *ngIf="!book.title">
         
-        <div padding>
-            <ion-label>Scan ISBN Barcode to get your book informations</ion-label>
-            
-            <button primary block (click)="scanBarcode()">
-                <ion-icon name="camera"></ion-icon>
-                Scan
-            </button>
-        </div>
+            <ion-item-divider light>Scan ISBN Barcode to get your book informations</ion-item-divider>
+            <div padding>
+                <button primary block (click)="scanBarcode()">
+                    <ion-icon name="camera"></ion-icon>
+                    Scan
+                </button>
+            </div>
+            <ion-item-divider light>Or Enter ISBN Code</ion-item-divider>
+            <ion-item>
+                <ion-label fixed item-left>ISBN</ion-label>
+                <ion-input type="text" [(ngModel)]="book.isbn"></ion-input>
+                 <button item-right [disabled]="!book.isbn" (click)="getBookInfo()">
+                    <ion-icon name="send"></ion-icon>
+                </button>
+            </ion-item>
+           
+        
         
     </div>
     
-    <div *ngIf="book">
-        {{book.title}}
+    <div *ngIf="book.title">
+        <ion-item-divider light>Book Informations</ion-item-divider>
+        <ion-item>
+            <ion-thumbnail item-left>
+                    <img src="{{book.thumbnail}}"/>
+            </ion-thumbnail>
+            <h2>{{book.title}}</h2>
+            <p>{{book.smallDescription}}</p>
+        </ion-item>
+        
+        <ion-item>
+            <p>{{book.authors}}, {{book.publisher}}, {{book.publishedDate}}</p>
+        </ion-item>
+
     </div>
-
-        <ion-item-divider light>Add additional informations</ion-item-divider>
-        <ion-list>
-
-            <ion-item>
-                <ion-label floating>Course code</ion-label>
-                <ion-input type="text"></ion-input>
-            </ion-item>
-
-            <ion-item>
-                <ion-label floating>Renting Price</ion-label>
-                <ion-input type="number"></ion-input>
-            </ion-item>
-            
-            <ion-item>
-                <ion-label floating>Price</ion-label>
-                <ion-input type="number"></ion-input>
-            </ion-item>
-            
-            <ion-item>
-                <ion-label>Add Sale Option ?</ion-label>
-                <ion-toggle checked="false" [(ngModel)]="isSale"></ion-toggle>
-            </ion-item>
-            
-            <ion-item *ngIf="isSale" >
-                <ion-label floating>Sale Price</ion-label>
-                <ion-input type="number"></ion-input>
-            </ion-item>
-
-    </ion-list>
     
-    <button primary block (click)="submit()">
-        <ion-icon name="send"></ion-icon>
-        Submit
-    </button>
+    <ion-item-divider light>Add Pricing Informations</ion-item-divider>
+    <ion-item>
+        <ion-label fixed>Renting Price</ion-label>
+        <ion-input type="number" [(ngModel)]="book.rentPrice"></ion-input>
+    </ion-item>
+    
+    <ion-item>
+        <ion-label>Add Sale Option ?</ion-label>
+        <ion-toggle checked="false" [(ngModel)]="isSale"></ion-toggle>
+    </ion-item>
+    
+    <ion-item *ngIf="isSale" >
+        <ion-label fixed>Sale Price</ion-label>
+    <ion-input type="number" [(ngModel)]="book.salePrice"></ion-input>
+    </ion-item>
+        
+    
+    <ion-item-divider light>Add additional informations</ion-item-divider>
+    <ion-item>
+        <ion-label fixed>Course code</ion-label>
+        <ion-input type="text" [(ngModel)]="book.courseCode"></ion-input>
+    </ion-item>
+    
+    <ion-item>
+        <ion-label fixed>University</ion-label>
+        <ion-input type="text" [(ngModel)]="book.university"></ion-input>
+    </ion-item>
+
+    
+    <div padding>
+        <button [disabled]="!book.title" primary block (click)="submit()">
+            <ion-icon name="send"></ion-icon>
+            Submit
+        </button>
+    </div>
     
     
 </ion-content>

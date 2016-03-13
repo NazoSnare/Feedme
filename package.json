@@ -8,6 +8,7 @@
     "es6-shim": "0.33.13",
     "express": "^4.13.4",
     "ionic-framework": "2.0.0-beta.1",
+    "ionic-native": "^1.0.12",
     "ionicons": "3.0.0-alpha.3",
     "reflect-metadata": "0.1.2",
     "rxjs": "5.0.0-beta.0",
@@ -28,7 +29,10 @@
     "cordova-plugin-whitelist",
     "cordova-plugin-splashscreen",
     "cordova-plugin-statusbar",
-    "ionic-plugin-keyboard"
+    "ionic-plugin-keyboard",
+    "phonegap-plugin-barcodescanner"
   ],
-  "cordovaPlatforms": []
+  "cordovaPlatforms": [
+    "android"
+  ]
 }
