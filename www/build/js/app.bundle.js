@@ -62249,6 +62249,9 @@
 	        this.nav = nav;
 	        this.mealService = mealService;
 	        this.selectedMeal = navParams.get('meal');
+	        if (this.selectedMeal) {
+	            this.direction = true;
+	        }
 	        this.map = null;
 	        this.searchQuery = '';
 	    }
@@ -62320,7 +62323,7 @@
 	                position: latLng,
 	                icon: 'images/book-icon-map.png'
 	            });
-	            var content = '<p (click)="showMealDetails()">' + meal.title + '</p><img src="' + meal.picture + '" height="64" width="64">';
+	            var content = '<p (click)="showMealDetails()">' + meal.title + '</p><img src="' + meal.thumbnail + '" height="64" width="64">';
 	            this.addInfoWindow(marker, content, meal);
 	        }
 	    }, {
@@ -62338,6 +62341,10 @@
 	    }, {
 	        key: 'setDirection',
 	        value: function setDirection(meal) {
+	            if (!meal.coords) {
+	                return;
+	            }
+
 	            var directionsDisplay = new google.maps.DirectionsRenderer({
 	                map: this.map
 	            });

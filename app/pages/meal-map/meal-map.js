@@ -17,6 +17,7 @@ export class MealMapPage {
     this.nav = nav;
     this.mealService = mealService;
     this.selectedMeal = navParams.get('meal');
+    if (this.selectedMeal) {this.direction = true;}
     this.map = null;
     this.searchQuery = '';
   }
@@ -82,7 +83,7 @@ export class MealMapPage {
         position: latLng,
         icon: 'images/book-icon-map.png'
     });
-    let content = `<p (click)="showMealDetails()">${meal.title}</p><img src="${meal.picture}" height="64" width="64">`;          
+    let content = `<p (click)="showMealDetails()">${meal.title}</p><img src="${meal.thumbnail}" height="64" width="64">`;          
     this.addInfoWindow(marker, content, meal);
   }
   
@@ -98,6 +99,10 @@ export class MealMapPage {
   }
   
   setDirection(meal) {
+    if (!meal.coords) {
+        return;
+    }  
+    
     let directionsDisplay = new google.maps.DirectionsRenderer({
         map: this.map
     });

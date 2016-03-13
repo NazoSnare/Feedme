@@ -11,7 +11,7 @@
     </button>
   </ion-buttons>
 </ion-navbar>
- 
+
 <ion-content>
   <ion-searchbar [(ngModel)]="searchQuery" (input)="getItems($event)" [debounce]="500"></ion-searchbar>
   <div id="map"></div>
@@ -31,3 +31,4 @@
         </button>
     </ion-list>
 </ion-content>
+
