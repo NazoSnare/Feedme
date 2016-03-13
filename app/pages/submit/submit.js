@@ -44,17 +44,23 @@ export class SubmitPage {
         //google books api
         //https://www.googleapis.com/books/v1/volumes?q=isbn:9781443411080
         //book = data.items[0]
+        //owner = (userId)
+        //rentPrice = (number)
+        //salePrice = (number)
+        //isRented = (boolean)
+        //isSold = (boolean)
+        //isbn = (string)
         //title = book.volumeInfo.title
-        //authors = book.volumeInfo.authors
+        //authors = book.volumeInfo.authors (array)
         //publisher = book.publisher
         //publishedDate = book.publishedDate
         //description = book.description
         //smallDescription = book.searchInfo.textSnippet
-        //categories = book.categories
+        //categories = book.categories (array)
         //pageCount = book.pageCount
-        //averageRating = book.averageRating
+        //averageRating = book.averageRating (number)
         //language = book.language
-        //thumnail = book.imageLinks.thumnail
+        //thumnail = book.imageLinks.thumbnail (string)
     }
     
     autoSetBookCoords() {

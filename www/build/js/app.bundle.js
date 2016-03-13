@@ -3189,13 +3189,13 @@
 
 	var _mealMap = __webpack_require__(359);
 
-	var _mealList = __webpack_require__(592);
+	var _mealList = __webpack_require__(593);
 
-	var _cookList = __webpack_require__(593);
+	var _cookList = __webpack_require__(594);
 
-	var _submit = __webpack_require__(596);
+	var _submit = __webpack_require__(595);
 
-	var _favoriteList = __webpack_require__(594);
+	var _favoriteList = __webpack_require__(596);
 
 	var _mealService = __webpack_require__(591);
 
@@ -62223,7 +62223,7 @@
 
 	var _mealService = __webpack_require__(591);
 
-	var _mapStyle = __webpack_require__(595);
+	var _mapStyle = __webpack_require__(592);
 
 	var _mapStyle2 = _interopRequireDefault(_mapStyle);
 
@@ -71483,6 +71483,17 @@
 
 /***/ },
 /* 592 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = [{ "featureType": "administrative", "elementType": "all", "stylers": [{ "visibility": "off" }] }, { "featureType": "landscape", "elementType": "all", "stylers": [{ "visibility": "simplified" }, { "hue": "#0066ff" }, { "saturation": 74 }, { "lightness": 100 }] }, { "featureType": "poi", "elementType": "all", "stylers": [{ "visibility": "simplified" }] }, { "featureType": "road", "elementType": "all", "stylers": [{ "visibility": "simplified" }] }, { "featureType": "road.highway", "elementType": "all", "stylers": [{ "visibility": "off" }, { "weight": 0.6 }, { "saturation": -85 }, { "lightness": 61 }] }, { "featureType": "road.highway", "elementType": "geometry", "stylers": [{ "visibility": "on" }] }, { "featureType": "road.arterial", "elementType": "all", "stylers": [{ "visibility": "off" }] }, { "featureType": "road.local", "elementType": "all", "stylers": [{ "visibility": "on" }] }, { "featureType": "transit", "elementType": "all", "stylers": [{ "visibility": "simplified" }] }, { "featureType": "water", "elementType": "all", "stylers": [{ "visibility": "simplified" }, { "color": "#5f94ff" }, { "lightness": 26 }, { "gamma": 5.86 }] }];
+
+/***/ },
+/* 593 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -71556,7 +71567,7 @@
 	}()) || _class);
 
 /***/ },
-/* 593 */
+/* 594 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -71621,7 +71632,119 @@
 	}()) || _class);
 
 /***/ },
-/* 594 */
+/* 595 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.SubmitPage = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _dec, _class;
+
+	var _ionic = __webpack_require__(5);
+
+	var _mealService = __webpack_require__(591);
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var SubmitPage = exports.SubmitPage = (_dec = (0, _ionic.Page)({
+	    templateUrl: 'build/pages/submit/submit.html'
+	}), _dec(_class = function () {
+	    _createClass(SubmitPage, null, [{
+	        key: 'parameters',
+	        get: function get() {
+	            return [[_ionic.NavController], [_mealService.MealService]];
+	        }
+	    }]);
+
+	    function SubmitPage(nav, mealService) {
+	        _classCallCheck(this, SubmitPage);
+
+	        this.nav = nav;
+	        this.mealService = mealService;
+	        this.book = null;
+	    }
+
+	    _createClass(SubmitPage, [{
+	        key: 'scanBarcode',
+	        value: function scanBarcode() {
+	            BarcodeScanner.scan().then(function (barcodeData) {
+	                console.log("We got a barcode\n" + "Result: " + result.text + "\n" + "Format: " + result.format + "\n" + "Cancelled: " + result.cancelled);
+	            }, function (err) {
+	                console.log('ERROR WHEN SCANING BARCODE', err);
+	            });
+	        }
+	    }, {
+	        key: 'getBookInfo',
+	        value: function getBookInfo(isbn) {
+	            var _this = this;
+
+	            //TODO Activate loading animation
+	            mealService.getBookInfo().subscribe(function (data) {
+	                _this.book = data;
+	                //TODO Remove loading animation
+	            }).catch(function (err) {
+	                console.log('ERROR WHEN GETTING BOOK INFO', err);
+	                //TODO Remove loading animation
+	            });
+
+	            //google books api
+	            //https://www.googleapis.com/books/v1/volumes?q=isbn:9781443411080
+	            //book = data.items[0]
+	            //owner = (userId)
+	            //rentPrice = (number)
+	            //salePrice = (number)
+	            //isRented = (boolean)
+	            //isSold = (boolean)
+	            //isbn = (string)
+	            //title = book.volumeInfo.title
+	            //authors = book.volumeInfo.authors (array)
+	            //publisher = book.publisher
+	            //publishedDate = book.publishedDate
+	            //description = book.description
+	            //smallDescription = book.searchInfo.textSnippet
+	            //categories = book.categories (array)
+	            //pageCount = book.pageCount
+	            //averageRating = book.averageRating (number)
+	            //language = book.language
+	            //thumnail = book.imageLinks.thumbnail (string)
+	        }
+	    }, {
+	        key: 'autoSetBookCoords',
+	        value: function autoSetBookCoords() {
+	            var _this2 = this;
+
+	            navigator.geolocation.getCurrentPosition(function (position) {
+	                _this2.book.coords = [position.coords.latitude, position.coords.longitude];
+	            });
+	        }
+	    }, {
+	        key: 'setBookCoords',
+	        value: function setBookCoords() {}
+	    }, {
+	        key: 'submitBook',
+	        value: function submitBook() {
+	            var _this3 = this;
+
+	            mealService.submitBook(this.book).subscribe(function (data) {
+	                return _this3.nav.pop();
+	            }).catch(function (err) {
+	                return console.log('ERROR WHEN SUBMITING ITEM', err);
+	            } //TODO handle error creation
+	            );
+	        }
+	    }]);
+
+	    return SubmitPage;
+	}()) || _class);
+
+/***/ },
+/* 596 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -71687,123 +71810,6 @@
 	    }]);
 
 	    return FavoriteListPage;
-	}()) || _class);
-
-/***/ },
-/* 595 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.default = [{ "featureType": "administrative", "elementType": "all", "stylers": [{ "visibility": "off" }] }, { "featureType": "landscape", "elementType": "all", "stylers": [{ "visibility": "simplified" }, { "hue": "#0066ff" }, { "saturation": 74 }, { "lightness": 100 }] }, { "featureType": "poi", "elementType": "all", "stylers": [{ "visibility": "simplified" }] }, { "featureType": "road", "elementType": "all", "stylers": [{ "visibility": "simplified" }] }, { "featureType": "road.highway", "elementType": "all", "stylers": [{ "visibility": "off" }, { "weight": 0.6 }, { "saturation": -85 }, { "lightness": 61 }] }, { "featureType": "road.highway", "elementType": "geometry", "stylers": [{ "visibility": "on" }] }, { "featureType": "road.arterial", "elementType": "all", "stylers": [{ "visibility": "off" }] }, { "featureType": "road.local", "elementType": "all", "stylers": [{ "visibility": "on" }] }, { "featureType": "transit", "elementType": "all", "stylers": [{ "visibility": "simplified" }] }, { "featureType": "water", "elementType": "all", "stylers": [{ "visibility": "simplified" }, { "color": "#5f94ff" }, { "lightness": 26 }, { "gamma": 5.86 }] }];
-
-/***/ },
-/* 596 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.SubmitPage = undefined;
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	var _dec, _class;
-
-	var _ionic = __webpack_require__(5);
-
-	var _mealService = __webpack_require__(591);
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	var SubmitPage = exports.SubmitPage = (_dec = (0, _ionic.Page)({
-	    templateUrl: 'build/pages/submit/submit.html'
-	}), _dec(_class = function () {
-	    _createClass(SubmitPage, null, [{
-	        key: 'parameters',
-	        get: function get() {
-	            return [[_ionic.NavController], [_mealService.MealService]];
-	        }
-	    }]);
-
-	    function SubmitPage(nav, mealService) {
-	        _classCallCheck(this, SubmitPage);
-
-	        this.nav = nav;
-	        this.mealService = mealService;
-	        this.book = null;
-	    }
-
-	    _createClass(SubmitPage, [{
-	        key: 'scanBarcode',
-	        value: function scanBarcode() {
-	            BarcodeScanner.scan().then(function (barcodeData) {
-	                console.log("We got a barcode\n" + "Result: " + result.text + "\n" + "Format: " + result.format + "\n" + "Cancelled: " + result.cancelled);
-	            }, function (err) {
-	                console.log('ERROR WHEN SCANING BARCODE', err);
-	            });
-	        }
-	    }, {
-	        key: 'getBookInfo',
-	        value: function getBookInfo(isbn) {
-	            var _this = this;
-
-	            //TODO Activate loading animation
-	            mealService.getBookInfo().subscribe(function (data) {
-	                _this.book = data;
-	                //TODO Remove loading animation
-	            }).catch(function (err) {
-	                console.log('ERROR WHEN GETTING BOOK INFO', err);
-	                //TODO Remove loading animation
-	            });
-
-	            //google books api
-	            //https://www.googleapis.com/books/v1/volumes?q=isbn:9781443411080
-	            //book = data.items[0]
-	            //title = book.volumeInfo.title
-	            //authors = book.volumeInfo.authors
-	            //publisher = book.publisher
-	            //publishedDate = book.publishedDate
-	            //description = book.description
-	            //smallDescription = book.searchInfo.textSnippet
-	            //categories = book.categories
-	            //pageCount = book.pageCount
-	            //averageRating = book.averageRating
-	            //language = book.language
-	            //thumnail = book.imageLinks.thumnail
-	        }
-	    }, {
-	        key: 'autoSetBookCoords',
-	        value: function autoSetBookCoords() {
-	            var _this2 = this;
-
-	            navigator.geolocation.getCurrentPosition(function (position) {
-	                _this2.book.coords = [position.coords.latitude, position.coords.longitude];
-	            });
-	        }
-	    }, {
-	        key: 'setBookCoords',
-	        value: function setBookCoords() {}
-	    }, {
-	        key: 'submitBook',
-	        value: function submitBook() {
-	            var _this3 = this;
-
-	            mealService.submitBook(this.book).subscribe(function (data) {
-	                return _this3.nav.pop();
-	            }).catch(function (err) {
-	                return console.log('ERROR WHEN SUBMITING ITEM', err);
-	            } //TODO handle error creation
-	            );
-	        }
-	    }]);
-
-	    return SubmitPage;
 	}()) || _class);
 
 /***/ }

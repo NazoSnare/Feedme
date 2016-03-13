@@ -10,15 +10,57 @@
 <ion-content>
     
     <div *ngIf="book == null">
-        <button>
-            <ion-icon name="camera"></ion-icon>
-            Scan ISBN Barcode
-        </button>
+        
+        <div padding>
+            <ion-label>Scan ISBN Barcode to get your book informations</ion-label>
+            
+            <button primary block (click)="scanBarcode()">
+                <ion-icon name="camera"></ion-icon>
+                Scan
+            </button>
+        </div>
+        
     </div>
     
     <div *ngIf="book">
-        {{book}}
+        {{book.title}}
     </div>
+
+        <ion-item-divider light>Add additional informations</ion-item-divider>
+        <ion-list>
+
+            <ion-item>
+                <ion-label floating>Course code</ion-label>
+                <ion-input type="text"></ion-input>
+            </ion-item>
+
+            <ion-item>
+                <ion-label floating>Renting Price</ion-label>
+                <ion-input type="number"></ion-input>
+            </ion-item>
+            
+            <ion-item>
+                <ion-label floating>Price</ion-label>
+                <ion-input type="number"></ion-input>
+            </ion-item>
+            
+            <ion-item>
+                <ion-label>Add Sale Option ?</ion-label>
+                <ion-toggle checked="false" [(ngModel)]="isSale"></ion-toggle>
+            </ion-item>
+            
+            <ion-item *ngIf="isSale" >
+                <ion-label floating>Sale Price</ion-label>
+                <ion-input type="number"></ion-input>
+            </ion-item>
+
+    </ion-list>
+    
+    <button primary block (click)="submit()">
+        <ion-icon name="send"></ion-icon>
+        Submit
+    </button>
+    
     
 </ion-content>
 

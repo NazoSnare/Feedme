@@ -24,10 +24,10 @@
     <ion-list>
         <button ion-item *ngFor="#meal of meals" (click)="itemTapped($event, meal)">
             <ion-thumbnail item-left>
-                <img src="{{meal.picture}}"/>
+                <img src="{{meal.thumbnail}}"/>
             </ion-thumbnail>
             <h2>{{meal.title}}</h2>
-            <p>{{meal.description}}</p>
+            <p>{{meal.smallDescription}}</p>
         </button>
     </ion-list>
 </ion-content>

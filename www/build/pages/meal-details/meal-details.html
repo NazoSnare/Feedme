@@ -2,19 +2,19 @@
     <button menuToggle>
         <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-title>Couscous</ion-title>
+    <ion-title>{{meal.title}}</ion-title>
 </ion-navbar>
 
 <ion-content class="meal">
     <div *ngIf="meal" class="selection">
         <ion-card>
-            <img src="{{meal.picture}}"/>
+            <img src="{{meal.thumbnail}}"/>
             <ion-card-content>
                 <h2 class="card-title">
                     {{meal.title}}
                 </h2>
                 <p>
-                    {{meal.description}}
+                    {{meal.smallDescription}}
                 </p>
             </ion-card-content>
             <ion-list>
@@ -35,13 +35,6 @@
                     <ion-note item-right>$5.99</ion-note>
                 </button>
                 
-                <button ion-item (click)="showCook($event, meal.cook)">
-                    <ion-avatar item-left>
-                        <img src="{{meal.cook.picture}}"/>
-                    </ion-avatar>
-                    <h2>{{meal.cook.name}}</h2>
-                    <p>{{meal.cook.title}}</p>
-                </button>
                 
             </ion-list>
             <ion-row no-padding>
