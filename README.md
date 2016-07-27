@@ -1,4 +1,5 @@
-### Deploying and Running Locally
+Mobile app made with Ionic2.
+Like Airbnb but for food...
 
 1. Install the the latest beta version of the Ionic CLI:
     ```
@@ -6,17 +7,17 @@
     ```
 
 
-1. Install the dependencies
+2. Install the dependencies
     ```
     npm install
     ```
     
-1. Start the server
+3. Start the server
     ```
     node server
     ```
 
-1. Open another command prompt and type the following command to build the app and start it in the browser:
+4. Open another command prompt and type the following command to build the app and start it in the browser:
     ```
     ionic serve
     ```
